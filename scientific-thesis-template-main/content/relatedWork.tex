@@ -6,12 +6,12 @@ state of the art research in the field of scene
  task-driven affordance grounding and open vocabulary object detection.
  Finally, we will note down the limitations in the current
  research and thus motivate our thesis to improve these limitations. 
- Specifically, we try to improve fine-grained segmentation i.einem
- pat-object segmentation, also called funcationality segmentation.
+ Specifically, we try to improve fine-grained segmentation i.e
+ pat-object segmentation, also called as functionality segmentation.
  \subsection{3D Scene graph generation:}
 In the subject of 3D scene graph generation we will take a look at the following papers, 
 Open3DSG\cite{koch2024open3dsgopenvocabulary3dscene}, 3DSceneGraphs \cite{armeni20193d} and ConceptGraph \cite{gu2023conceptgraphsopenvocabulary3dscene}. 
-We look at these papers, as to take inspiration for building our own scenegraph 
+We look at these papers, as to take inspiration for building our own scene graph 
 using either of these implementaitons. Our take on the task two of the scenefun3D, task-driven affordance grounding will 
 take help of the scene graph generated from one of these implementaitons.
 To generate the scene graphs these papers utilise,
@@ -34,7 +34,7 @@ finding fine-grained realtionships between the object and its part.
 The task to segment out a part from a 3D object is still novel in today's research due to the limited availability of large scale 3D datasets
 , works like PartNet \cite{Mo_2019_CVPR}, scenefun3D \cite{delitzas2024scenefun3d} have made notable contributions by providing benchmarks and datasets for this problem. 
 However, they lack in some areas, PartNet has a limited set of data and it is not specifically related to robotics or object manipulation, the parts are not
-eactly the functional element of the parent objec that can be manipulated by a robot. They have general
+eactly the functional element of the parent object that can be manipulated by a robot. They have general
 classes of obejcts such as airplane, chair just to name a few. Whereas on the other hand, scenefun3D has parts annotated as the functional elements in the entire scene. Considering
 the entire scene as the query for segmenting a part as a functional element has some limitation and their results show average 7 \% average precision, 18 \% average precison for mIoU 
 50\% and 26 \% average precision for mIoU 25\%. We consider their results as a baseline and propose to improve the results. 
@@ -54,15 +54,15 @@ In the context of grounding 3D scene affordances to the given task, \citet{liu20
  Egocentric Interaction-driven 3D Scene Affordance Grounding (Ego-SAG). The paper proposes to identify affordance regions in a 3D scene on the basis of 
  an egocentric vieo of the interaction. The paper further compares their results with the following line of work,
 \cite{huang2024openins3dsnaplookup3d}, \cite{Nguyen_2024_CVPR} and \cite{takmaz2023openmask3dopenvocabulary3dinstance}. However, the fine-grained 
-segmentation of the function element required to perform the task is absent. Open3dIS presents a framework for 3D instance segmentation which is based on
+segmentation of the functional element required to perform the task is absent. Open3dIS presents a framework for 3D instance segmentation which is based on
 zero shot leraning for unseen objects. They leverage 2D mask for guding segmentation process and integrate it with 3D feature extraction pipelines. And, in the context
 of task-driven affordance grouding, the capabilities of Open3DIS are highly relevant but lack the depth of fine grained segmentation. Open Mask 3D is a framework
  for open-vocabulary 3D scene understanding. They employ
 various foundation models to generalize various 3D tasks. Transformer based backbone is leveraged that integrates 2D and 3D features to enhance 
 recognition and segmentation tasks. Therefore, tasks such as identifying objects capable of specific interactions benefit from OpenMask 3D. 
-But even OpenMask3D lacks finegrained scene understanding at function element level
+But even OpenMask3D lacks finegrained scene understanding at the functional element level
 Open Mask3D \cite{takmaz2023openmask3dopenvocabulary3dinstance} is also used for comparison by
-\citet{delitzas2024scenefun3d}, here they modify the implementaiton of OpenMask3D a bit to incorporate segmentaion of the function elements. 
+\citet{delitzas2024scenefun3d}, here they modify the implementaiton of OpenMask3D a bit to incorporate segmentaion of the functional elements. 
 They describe this task in \cite{delitzas2024scenefun3d} and present their results and show notable improvements.\\
 However, the results obtained by \citet{delitzas2024scenefun3d}
 can be considered as baseline results and further improved by utilisig scene graph as an intermediate step for task-driven affordance grounding.
