@@ -64,18 +64,53 @@ the relationships between the nodes are leveraged to incorporate meaningful info
  [https://openaccess.thecvf.com/content_CVPR_2019/html/Yang_Auto-Encoding_Scene_Graphs_for_Image_Captioning_CVPR_2019_paper.html]. 
  Scene graphs can also be used to detect visual relationships between objects in an image [], Visual question answering, semantic image retrieval and many more.
 
-Before moving to the generation of 3D scene graphs, we will look at the tools used during this process. Mainly foundation models like Visual Language Models such as LLaVA and Chat Gpt 4, and SAM for segmentation are used. Along with this, object detection models like YoLo form the basis of 3D scene graph generation. Next, let us look at the theoretical concepts behind these models then have a look at how they help in scene graph generation.
-Foundation models:
-Foundation models can be defined as large-scale, pre-trained models that can perform various downstream tasks[https://arxiv.org/abs/2108.07258]. Large amount of data is required for their training, such data is gathered from massive datasets generated across diverse domains, this makes generalization possible in foundation models. Their applications range from natural language processing (NLP), computer vision (CV) to robotics and more.
-Segment Anything model (SAM) [https://arxiv.org/abs/2304.02643]:
-SAM was developed by Meta. This foundation model can segment any given 2D image. Segmentation can be made using the following prompts, it can be prompted with interactive points and boxes, automatically segment everything in the image without a prompt, and generate multiple masks for ambiguous prompts. According to Meta AI, “Sam has learned a general notion of what objects are – this understanding enables zero-shot generalization to unfamiliar objects and images without requiring additional training.”. 
-Vision Language Models (VLMs):
-VLMs are advanced machine learning models able to process visual and textual data. They  can generate outputs based on the understanding of the multimodal (text and image) input provided to them. In this chapter we will be looking at the two most used VLMs, ChatGPT-4 and LLaVA.
+Before moving to the generation of 3D scene graphs, we will look at the tools used during this process. 
+These tools are mainly machine learning and deep learning models. Scene graphs are generated from RGB-D images and poses. 
+Out of these, RGB images play an important role in providing semantic information to the scene graph. RGB images are used for object detection,
+object segmentation, relationship building and caption generation. All of these tasks are possible due to one or more AI models.
+Mainly foundation models like Visual Language Models such as LLaVA and Chat Gpt 4 are used for caption generation and 
+relationship building, and SAM for object segmentation. Along with this, object detection models like YoLo form the basis of 
+3D scene graph generation. 
+Next, let us look at the theoretical concepts behind these models then have a look at how they help in scene graph generation.
+\subsection{Foundation models:}
+Foundation models can be defined as large-scale, pre-trained models that can perform various downstream tasks\cite{bommasani2022opportunitiesrisksfoundationmodels}. 
+Foundation models have two reasons for being successful, scale and transfer learning. On one hand, Scale represents,
+more computing power in terms of CPU, GPU and memory and large amount of multimodal training data. Such data is gathered from 
+massive datasets generated across diverse domains, this makes generalization possible in foundation models. On the other hand, transfer
+learning takes the learnings from one task (e.g., object recognition in images) and
+applies it to another task (e.g., activity recognition in videos). 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{images/FoundationModels.png}
+    \caption{Foundation model overview.}
+    \label{fig:foundation_model}
+\end{figure}
+From \cref{fig:foundation_model} we can see that, 
+A foundation model gathers the knowledge from all the data from various data sources such as, texts, images, videos and many more.
+This model then adapts to a wide range of downstream tasks such as, question answering, sentimen analysis, object detection just to 
+name a few. Their applications range from natural language processing (NLP), computer vision (CV) to robotics and more. 
+Let us look at some of the foundation models we will be using in our scene graph implementation.
+
+\subsubsection{Segment Anything model [https://arxiv.org/abs/2304.02643]:}
+The paper by \citet{kirillov2023segment} first introduced Segment Anything Model (SAM). SAM is developed by Meta FAIR. 
+This foundation model can segment any given 2D image. Segmentation can be made using the following ways, 
+it can be prompted with interactive points and boxes, automatically segment everything in the image without a prompt, 
+and generate multiple masks for ambiguous prompts. According to Meta AI, “Sam has learned a general notion of what objects are – this understanding enables zero-shot generalization to 
+unfamiliar objects and images without requiring additional training.”. The outstanding accomplishments of SAM are possible due to the fact that
+the authors used large number of masks approximately 1 billion masks from 11 million images to train the model. Due to such large dataset, 
+the model has learnt to segment almost anythin out of a given image, hence the name Segment Anything Model.
+
+\subsubsection{Vision Language Models (VLMs):}
+VLMs are advanced machine learning models able to process visual and textual data. 
+They  can generate outputs based on the understanding of the multimodal (text and image) input provided to them. 
+In this chapter we will be looking at the two most used VLMs, ChatGPT-4 and LLaVA.
 ChatGPT-4:
 LLava [https://arxiv.org/abs/2304.08485]
- Large Language and Vision Assistant (LLaVA) is an end-to-end large multimodal model trained on data generated with the help of GPT-4. It connects vision encoder and LLM for general purpose visual and language queries. LLaVA performs well on vision queries. Vision queries are queries where the model is provided with an image and a general query is asked regarding the image. For eg, An image with a room is provided and the query can be, ”Is there a computer present in this image?”. 
-\subsection{Generating scene graphs:}
-\subsection{Object segmentation:}
-\subsection{Foundation models:}
-\subsection{Open-vocabulary obejct detection:}
+ Large Language and Vision Assistant (LLaVA) is an end-to-end large multimodal model trained on data generated with the help of GPT-4. 
+ It connects vision encoder and LLM for general purpose visual and language queries. LLaVA performs well on vision queries. 
+ Vision queries are queries where the model is provided with an image and a general query is asked regarding the image. 
+ For eg, An image with a room is provided and the query can be, ”Is there a computer present in this image?”. 
 
+\subsection{Object segmentation:}
+\subsection{Open-vocabulary obejct detection:}
+\subsection{Generating scene graphs:}

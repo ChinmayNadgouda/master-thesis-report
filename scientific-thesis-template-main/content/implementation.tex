@@ -1,0 +1,50 @@
+In this chapter, we will begin with the actual implementation for the proposed solution. 
+We will list the hardware and the software components used in our system and provide the steps and code 
+for the important components in our system.
+
+\subsection{Hardware Specifications:}
+Camera: Intel Realsense 435D
+Workstation: CPU Intel i9, GPU: Nvidia GeForce RTX 4070 laptop GPU and CPU Intel, GPU: Nvidia GeForce A4000
+(Note: CPU is not as important as the GPU, for better training times consider using better GPU)
+\subsection{Software Specifications:}
+Softwares used: VScode, Python 3.10.9, SAM, CLIP, Yolo-world, Mask3D, Pointnet ++, LLaVA 1.6
+
+Above we looked at the Specifications and requirements for our system. Now, we will look at the implementation details of the finer concepts in the 
+three components we saw in the last chapter.
+We will dive step by step into the main implementation concepts namely, Pose generation, Image extraction and Alginment, Concept Graph implementation, 
+training Mask3D and Point Net, Integration with Concept Graph, Query handling.
+
+\subsection{Pose generation:}
+During our implementation we faced with the challenge of determining poses for the recorded camera images from out Realsense camera. The realsense camera provides IMS 
+values of its positions but they are not accurate. For the purpose of 3D reconstruction from a sequence RGB-D images it is essential to have ground truth poses. This 
+can be achieved either by using external setups like a GPS or a positioning system or a software like COLMAP can be utilised. In our thesis, we focus on using COLMAP,
+which as structure form motion software. 
+
+COLMAP takes the sequence of RGB images as an input and give the ground truth pose in the world to camera co-ordinates. However, as concept graph expects camera to world
+co-ordinates and the world axis of the two is not aligned. Therefore we had to perform some transformation given below.
+
+
+\subsection{Image extraction and Alginment:}
+The camera used was integrated in to a ros platform and it outputs a rosbag for the recorded video. This rosbag consisted of a sequential RGB-D images for each time
+stamp. The image resolution for RGB images was 1080*1920 and the image resolution for depth images was 1080*1080. The pixels from color images were not point to point 
+algined with the depth pixels. Therefore, we leverage the python package open-realsense2 provided by Intel to align the depth and color images. The sudo code for the 
+following is given below. 
+
+Failing to align RGB-D images resulted in distoreted point clouds, as the object detection bounding box and mask were projected onto the depth vaules to create the point clouds.
+
+\subsection{Concept Graph implementation:}
+In our thesis, we have utilised a state of the art method for generating scene graphs, ConceptGraphs. The implementation for concept graphs is already present on
+github. We will dive deep into the implementation details of this open source method developed by \citet{scenefun3D}.
+
+First, we will have a look at the configuration files and the overall requirements of this method. Later, we will introduce the models and steps taken one by one, starting 
+with YOLO for obect detection, SAM for segmenting the detected objects and obtaining masks for the objects. Next, we will look at the detailed implementation to 
+obtain spatial relationships and image-object captions using VLMs like CLIP and LLaVA. All these steps are iterated for all the images in the provded dataset. After each iteration 
+the detected objects are stored and logged in a rerun viewer for visualisation. These newly detected objects are compared visually and semantically with the 
+objects stored in last iteration. Objects which are similar to existing objects are merged. Finally, we will look at the novel extension proposed by this thesis. 
+We propose the adition of the trained models like Mask3D and pointnet in the last iteration or the last image of the dataset. The objects stored and detected so far will
+be looped and their point clouds will be passed to Mask3D or PointNet. The model will then segment out the parts for the given objects. The parts obtained from
+the models will be given a label and 5 textual descriptions, these textual description will be related to the tasks that can be performed by these parts as a composition
+of the given object.
+\subsection{training Mask3D and Point Net}
+\subsection{Integration with Concept Graph:}
+\subsection{Query handling:}
