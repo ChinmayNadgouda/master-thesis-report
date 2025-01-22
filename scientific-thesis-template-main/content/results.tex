@@ -1,0 +1,45 @@
+After implementing our system, experimentations are the next step to evaluate the system. We will focus on quantitative and qualitative results.
+To present our quantitative results we will use Average Precision at mIoU thresholds 25\% and 50\% and for qualitative results will present few of 
+the point cloud segmentations and scene graphs generated using our system. 
+
+For experimentations, we have used ARKIT scenes dataset. They provide large number of scenes enumerated by visit_id and each visit_id has atmost three 
+video recordings of the same scene denoted by video_id. For the purpose of experiments we divide the dataset into train, validation and test splits. We have trained
+the Mask3D and PointNet models with training set and validation set. Therefore, for experimentation we will use the test split and evaluate the two SceneFun3D tasks defined 
+earlier.
+
+\subsection{Functionality segmentation:}
+For this task we will present both the quantitative results as well as the qualitative results. The results from scenefun3d for this task are taken as baseline. 
+SceneFun3D have used adpated versions of Mask3D and SoftGroup and LERF for experiments. We have utilised Mask3D and PointNet ++ in our experiments. The reason for using 
+Mask3D was to compare the results with scenefun3d and evaluate our method. PointNet ++ was leverage as it is the state of the art 3D CNN for part segmentation.
+
+The table below compare the resutls from scenefun3d and our implementation results. We also consider all the results from scenefun3d and not only limit ourselves to
+Mask3D. Additionally, we also include our point net ++ results.
+
+\begin{longtable}{|l|l|l|}
+    \caption{Quantitative result comparison for task functionality segmentation.} \label{tab:long} \\
+    
+    \hline \multicolumn{1}{|c|}{\textbf{Method}} & \multicolumn{1}{c|}{\textbf{AP}} & \multicolumn{1}{c|}{\textbf{AP50}} & \multicolumn{1}{|c|}{\textbf{AP25}} \\ \hline
+    \endfirsthead
+    
+    \hline \hline
+    \endlastfoot
+    SoftGroup-F & 3.6 & 17.2 \\
+    LERF & 4.8 & 12.3 & 18.1\\
+    Mask3D-F & 7.9 & 18.3 & 26.6\\
+    Mask3D-Ours & 22.2 & 28.8 & 35.8\\
+    PointNet & BC & D \\
+\end{longtable}
+    
+
+In addition to quantitative results, let us take a look at some qualitative results in Figure above. We compare our results with the ground truth.
+
+\subsection{Task-driven affordance grounding:}
+The results for this task will be presented as quantitative results with images from the output of our system. We query our concept graph with natural language
+queries and the system returns us the segmented point cloud with the most probable object highlighted in red, the second most probable obejct in a orangish red shade and 
+thus .
+
+We ask our system two queries, "Open the cabinet below the mirror" and "Open the drawer of the cabinet next to the bathtub." 
+The results of the two queries are given below.
+
+
+
