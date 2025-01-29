@@ -1,50 +1,461 @@
-In this chapter, we will begin with the actual implementation for the proposed solution. 
-We will list the hardware and the software components used in our system and provide the steps and code 
-for the important components in our system.
+In this chapter, we will begin with the actual implementation of the proposed solution. The implementation section will list the challenges faced and
+the tasks completed during the thesis. It also provides unique solutions to each of them. This will provide necessary details into the methods used and will
+enable a better understanding of the overall implementation process. Along with this, we will list the hardware and software components 
+used in our system and provide the steps and code for the important components in our system. 
+The hardware and software specifications are documented to ensure reproducibility and provide
+insights into the computational costs required for similar research in the future. The pseudo-code and algorithms are not the actual code implemented
+during the thesis but just an abstraction of the original idea. The software libraries evolve, thus, we plan to maintain the code for
+future versions in the following GitHub link: \url{https://github.com/ChinmayNadgouda/sceneGraph3D/tree/concept-graph}.
 
-\subsection{Hardware Specifications:}
-Camera: Intel Realsense 435D
-Workstation: CPU Intel i9, GPU: Nvidia GeForce RTX 4070 laptop GPU and CPU Intel, GPU: Nvidia GeForce A4000
-(Note: CPU is not as important as the GPU, for better training times consider using better GPU)
-\subsection{Software Specifications:}
-Softwares used: VScode, Python 3.10.9, SAM, CLIP, Yolo-world, Mask3D, Pointnet ++, LLaVA 1.6
+\subsection{Software Specifications}
+The software environment and tools utilized are summarized in \ref{tab:software_specs}. These requirements are strict as there are inter-dependencies
+between many Python libraries. For later versions of the following libraries, necessary changes need to be made as per the updates in that specific library.
 
-Above we looked at the Specifications and requirements for our system. Now, we will look at the implementation details of the finer concepts in the 
-three components we saw in the last chapter.
-We will dive step by step into the main implementation concepts namely, Pose generation, Image extraction and Alginment, Concept Graph implementation, 
-training Mask3D and Point Net, Integration with Concept Graph, Query handling.
+\begin{table}[ht]
+    \centering
+    \caption{Software Specifications}
+    \label{tab:software_specs}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Software}      & \textbf{Version}   & \textbf{Purpose}                     \\
+        \midrule
+        Python                & 3.10               & Core development                      \\
+        PyTorch               & 2.1                & Deep learning framework               \\
+        Open3D                & 0.17               & Point cloud processing                \\
+        COLMAP                & 3.9                & 3D reconstruction                     \\
+        CUDA                  & 11.8               & GPU acceleration                      \\
+        Anaconda              & 2023.07            & Environment management                \\
+        Git                   & 2.42               & Version control                       \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+\subsection{Hardware Specifications}
+The hardware setup used for the experiments is detailed in \ref{tab:hardware_specs}. It includes the Specifications of the system
+used to develop and test the proposed solution. Although these specifications are not strict requirements, we found these to work best for our
+thesis.
+
+\begin{table}[ht]
+    \centering
+    \caption{Hardware Specifications}
+    \label{tab:hardware_specs}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Component}      & \textbf{Specification}              \\
+        \midrule
+        CPU                     & Intel Core i7-12700H, 14 cores, 4.7 GHz \\
+        GPU                     & NVIDIA RTX 3090, 24GB GDDR6X          \\
+        RAM                     & 32GB DDR5                             \\
+        Storage                 & 1TB NVMe SSD                          \\
+        Operating System        & Ubuntu 22.04 LTS (64-bit)             \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+
+Listed in \cref{tab:software_specs} and \cref{tab:hardware_specs} are the specifications and requirements of our system. Now, we will look at the implementation details of the finer concepts in the 
+three components we saw in \cref{chap:k6}.
+
+We will dive step by step into the main implementation concepts, Pose generation, Image extraction and alginment, ConceptGraphs implementation, 
+training Mask3D and Point Net, integration of Mask3D and PointNet with Concept Graph, and Query handling.
 
 \subsection{Pose generation:}
-During our implementation we faced with the challenge of determining poses for the recorded camera images from out Realsense camera. The realsense camera provides IMS 
-values of its positions but they are not accurate. For the purpose of 3D reconstruction from a sequence RGB-D images it is essential to have ground truth poses. This 
-can be achieved either by using external setups like a GPS or a positioning system or a software like COLMAP can be utilised. In our thesis, we focus on using COLMAP,
-which as structure form motion software. 
+The Intel Realsense Depth Camera D435 \url{https://www.intelrealsense.com/depth-camera-d435/} was used for recording the scene at our lab. 
+While we recorded the scene, we faced the challenge of determining poses for the recorded camera images from our Realsense camera. The realsense camera provides IMU extrinsic
+values but they are not useful in our case. For the purpose of 3D reconstruction from a sequence of RGB-D images, it is essential to have ground truth camera poses. This 
+can be achieved either by using external setups like, GPS or software like COLMAP can be utilised. In our thesis, we focus on using COLMAP,
+which is a structure from motion software. 
 
-COLMAP takes the sequence of RGB images as an input and give the ground truth pose in the world to camera co-ordinates. However, as concept graph expects camera to world
-co-ordinates and the world axis of the two is not aligned. Therefore we had to perform some transformation given below.
+COLMAP takes the sequence of RGB images as an input and gives the ground truth pose in the world to camera (w2c) coordinates. However, ConceptGraphs expects camera to world (c2w)
+coordinates and the world axes of the two are not aligned. Therefore we had to apply the transformation matrix given below. The COLMAP outputs are w2c poses and can be found 
+in images.bin or images.txt files. The poses are given line by line and each line has nine entries. The first four entries are quaternions, the next 3 are translations and the remaining entries are
+not useful for pose estimation.
 
+\begin{lstlisting}
+  with open(os.path.join("images.txt"), "r") as f:
+    for line in f:
+      elems=line.split(" ") # 1-4 is quat, 5-7 is trans, 9ff is filename 
+      qvec = np.array(tuple(map(float, elems[1:5])))
+      tvec = np.array(tuple(map(float, elems[5:8])))
+      R = qvec2rotmat(-qvec)
+      t = tvec.reshape([3,1])
+      m = np.concatenate([np.concatenate([R, t], 1), bottom], 0)
+      c2w = np.linalg.inv(m)
+      c2w[0:3,2] *= -1 # flip the y and z axis
+      c2w[0:3,1] *= -1
+      c2w = c2w[[1,0,2,3],:]
+      c2w[2,:] *= -1 # flip whole world upside down
+\end{lstlisting}
+We refer the transformation steps given in this \href{https://github.com/NVlabs/instant-ngp/blob/master/scripts/colmap2nerf.py}{script} by \citet{mueller2022instant}. 
 
 \subsection{Image extraction and Alginment:}
-The camera used was integrated in to a ros platform and it outputs a rosbag for the recorded video. This rosbag consisted of a sequential RGB-D images for each time
-stamp. The image resolution for RGB images was 1080*1920 and the image resolution for depth images was 1080*1080. The pixels from color images were not point to point 
-algined with the depth pixels. Therefore, we leverage the python package open-realsense2 provided by Intel to align the depth and color images. The sudo code for the 
-following is given below. 
+Intel provides a ROS wrapper for the Realsense D435  camera. Therefore the output is a rosbag for the recorded video. This rosbag consists of sequential RGB-D images for each time
+stamp. The image resolution for RGB images is 1920*1080 and the image resolution for depth images is 1280*720. As a result, the pixels from colour images are not aligned with the depth pixels due to 
+resolution mismatch, different fields of view (FoV) and physical separation of depth and colour cameras. Therefore, we leverage the Python package pyrealsense2 provided by Intel to align the depth and colur images. 
+The brief code for the following is given below. 
 
-Failing to align RGB-D images resulted in distoreted point clouds, as the object detection bounding box and mask were projected onto the depth vaules to create the point clouds.
+\begin{lstlisting}
+  import pyrealsense2 as rs
 
-\subsection{Concept Graph implementation:}
-In our thesis, we have utilised a state of the art method for generating scene graphs, ConceptGraphs. The implementation for concept graphs is already present on
-github. We will dive deep into the implementation details of this open source method developed by \citet{scenefun3D}.
+  pipeline = rs.pipeline()     
+  config = rs.config()
+  config.enable_device_from_file(fname, repeat_playback=False) 
+                                          #fname contain the .rosbag location
+  align_to = rs.stream.color
+  align = rs.align(align_to)
+  while True:
+    frames = pipeline.wait_for_frames()
+    aligned_frames = align.process(frames)
+    aligned_depth_frame = aligned_frames.get_depth_frame()
+    color_frame = aligned_frames.get_color_frame()
+    if not aligned_depth_frame or not color_frame:
+        continue
+    depth_image = np.asanyarray(aligned_depth_frame.get_data())
+    color_image = np.asanyarray(color_frame.get_data())
+    color_image_rgb = cv2.cvtColor(color_image, cv2.COLOR_BGR2RGB) 
+                                         #output is BGR need to convert to RGB
+  pipeline.stop()
+\end{lstlisting}
+The RGB images are used for object detection as well as segmentation using SAM whereas the depth images provide distance values of each pixel.
+The SAM masks and the depth values play an important role in forming the point clouds. To avoid distorted point clouds in the final scene graph 
+alignment of the RGB-D images is paramount.
+
+\subsection{ConceptGraphs implementation:}
+In our thesis, we have utilised a state-of-the-art method for generating scene graphs, ConceptGraphs \cite{gu2023conceptgraphsopenvocabulary3dscene}.
+ The implementation for ConceptGraphs is already present on GitHub. We will dive deep into the implementation details of this open-source method developed by \citet{gu2023conceptgraphsopenvocabulary3dscene}.
 
 First, we will have a look at the configuration files and the overall requirements of this method. Later, we will introduce the models and steps taken one by one, starting 
-with YOLO for obect detection, SAM for segmenting the detected objects and obtaining masks for the objects. Next, we will look at the detailed implementation to 
-obtain spatial relationships and image-object captions using VLMs like CLIP and LLaVA. All these steps are iterated for all the images in the provded dataset. After each iteration 
-the detected objects are stored and logged in a rerun viewer for visualisation. These newly detected objects are compared visually and semantically with the 
-objects stored in last iteration. Objects which are similar to existing objects are merged. Finally, we will look at the novel extension proposed by this thesis. 
-We propose the adition of the trained models like Mask3D and pointnet in the last iteration or the last image of the dataset. The objects stored and detected so far will
-be looped and their point clouds will be passed to Mask3D or PointNet. The model will then segment out the parts for the given objects. The parts obtained from
-the models will be given a label and 5 textual descriptions, these textual description will be related to the tasks that can be performed by these parts as a composition
-of the given object.
-\subsection{training Mask3D and Point Net}
+with YOLO for object detection, SAM for segmenting the detected objects and obtaining masks for the objects. Next, we will look at the detailed implementation to 
+obtain spatial relationships and image-object captions using VLMs like CLIP and LLaVA. All these steps are iterated over all the images for the provided dataset. After each iteration, 
+the detected objects are stored and logged into a rerun viewer for visualisation. These newly detected objects are compared visually and semantically with the 
+objects stored in the previous iteration. Objects which are similar to existing objects are merged. Finally, we will look at the novel extension proposed by this thesis. 
+We propose the addition of the trained models like Mask3D and PointNet in the last iteration. In the last iteration, we will have all the objects detected so far. We will
+loop over these objects and their point clouds will be passed to Mask3D or PointNet. The model will then segment out the parts for the given objects. The parts obtained from
+the models will be given a label and five textual descriptions, these textual descriptions for each part will be related to the tasks that can be performed by it as a composition
+of its parent object. The objects are stored in a detection list with the following schema. 
+\begin{lstlisting}
+  detected_object = {
+  'id' : uuid.uuid4(), 
+  'image_idx' : [image_idx],     # idx of the image
+  
+  'mask_idx' : [mask_idx],       # idx of the mask/detection
+  'color_path' : [color_path],   # path to the RGB image
+  'class_name' : curr_class_name,   # global class name for this detection
+  'class_id' : [curr_class_idx],    # global class id for this detection
+  'captions' : [gobs['captions'][mask_idx]],  # captions for this detection
+  'num_detections' : 1,            # number of detections in this object
+  'mask': [gobs['mask'][mask_idx]],   #from yolo
+  'xyxy': [gobs['xyxy'][mask_idx]],    #from yolo
+  'conf': [gobs['confidence'][mask_idx]],    #from yolo
+  'n_points': len(obj_pcds_and_bboxes[mask_idx]['pcd'].points),                       
+  "inst_color": np.random.rand(3),  # A random color used for this segment instance
+  'is_background': is_bg_object,    # background classes are wall, floor and roof
+  
+  # These are for the entire 3D object
+  'pcd': obj_pcds_and_bboxes[mask_idx]['pcd'],   #from point cloud
+  'bbox': obj_pcds_and_bboxes[mask_idx]['bbox'],  #from point cloud
+  'clip_ft': to_tensor(gobs['image_feats'][mask_idx]),  #from CLIP
+  'num_obj_in_class': num_obj_in_class,
+  'curr_obj_num': tracker.total_object_count,
+  'new_counter' : tracker.brand_new_counter,
+}
+\end{lstlisting}
+
+The fields xyxy and conf will be obtained from YOLO. The field mask will be obtained from SAM.
+The fields pcd, bbox and n\_points will be obtained from the point cloud generation algorithm. The field clip\_ft is the 
+CLIP embedding from CLIP and captions will be generated by LLaVA. We will see the implementation pseudo code for each below.
+
+\subsubsection{Yolo object detection:}
+ConceptGraphs utilise the Yolo-world model, which shows great performance for open vocabulary object detections. At every iteration, yolo detects the objects in the image
+ from a given list of classes. These classes can be given runtime or can be inferred from CLIP. Yolo returns the class\_id of the detected object which corresponds to the index of the class list provided.
+ It also returns the bounding boxes and confidences for each object. 
+ \begin{lstlisting}
+  def get_object_detections(YOLO, rgb):
+    detection_model = YOLO('yolov8l-world.pt')
+
+    image = cv2.imread(str(rgb)) # This will in BGR color space
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Do initial object detection
+    results = detection_model.predict(rgb, conf=0.1, verbose=False)
+    conf = results[0].boxes.conf.cpu().numpy()
+    detection_class_ids = results[0].boxes.cls.cpu().numpy().astype(int)
+    detection_class_labels  = #class of the detected object
+    xyxy_tensor = results[0].boxes.xyxy
+    xyxy = xyxy_tensor.cpu().numpy()
+
+    return conf, detection_class_ids, detection_class_labels, xyxy
+\end{lstlisting}
+
+\subsubsection{SAM segmentation:}
+In the next step, we will pass the same image along with the bounding boxes to SAM. This will be the prompt for SAM, the bounding boxes dictate
+ the area where SAM must perform segmentation and return the corresponding masks.
+\begin{lstlisting}
+  def get_object_masks(SAM, rgb, bounding_box = xyxy_tensor):
+    sam_predictor = SAM('mobile_sam.pt') # UltraLytics SAM
+    if bounding_box.numel() != 0:
+        sam_out = sam_predictor.predict(rgb, bboxes=bounding_box, verbose=False)
+        masks_tensor = sam_out[0].masks.data
+        mask = masks_tensor.cpu().numpy()
+    else:
+        mask = np.empty((0, *color_tensor.shape[:2]), dtype=np.float64)
+    
+        return mask
+\end{lstlisting}
+\subsubsection{CLIP embeddings:}
+CLIP will be used to obtain the image features in text form which are embedded using CLIP itself. The embeddings are for individual objects and hence we crop 
+out the object from the original image using the bounding boxes earlier provided by YOLO. We process all the cropped images in batches, the class for each object is 
+also encoded and fed to the CLIP model. This ensures better performance in obtaining accurate feature embeddings. The feature embeddings represent the image in a 
+high-dimensional space, capturing semantic similarities.
+\begin{lstlisting}
+  def get_clip_embeddings(CLIP, cropped_images, detection_classes):
+    preprocessed_images = []
+    image_crops = []
+    for cropped_image in cropped_images:  
+      preprocessed_image = clip_preprocess(cropped_image).unsqueeze(0)
+      preprocessed_images.append(preprocessed_image)
+      image_crops.append(cropped_image)
+    
+    text_tokens = detection_classes
+    image_features = []
+    image_feats = []
+    if len(detection_classes) is not 0:
+      # Convert lists to batches
+      preprocessed_images_batch = torch.cat(preprocessed_images, dim=0).to(device)
+      text_tokens_batch = clip_tokenizer(text_tokens).to(device)
+
+      # Batch inference
+      with torch.no_grad():
+          image_features = CLIP.encode_image(preprocessed_images_batch)
+          image_features /= image_features.norm(dim=-1, keepdim=True)
+
+      # Convert to numpy
+      image_feats = image_features.cpu().numpy()
+    return image_feats, image_crops
+\end{lstlisting}
+
+\subsubsection{LLaVA spatial relationship:}
+We will leverage LLaVA to generate the edges in our scene graph. The edges represent the spatial relationship between the objects in the scene. 
+The LLaVA model will need an image and two prompts. The image must contain the bounding boxes for detected objects and the boxes must be annotated by the object ID. 
+The two prompts needed are the system and user prompts. The system prompt informs the model about the task that needs to be performed and the context. 
+And the user prompt is the actual query. 
+
+We have utilised the following system prompt, 
+\begin{lstlisting}
+  """You are an agent specialized in describing the spatial relationships between objects 
+  in an annotated image. You will be provided with an annotated image and a list of labels
+  for the annotations. Your task is to determine the spatial relationships between the 
+  annotated objects in the image, and return a list of these relationships in the correct 
+  list of tuples format as follows: 
+
+                                  [("object1", "spatial relationship", "object2"), ...] 
+
+  Your options for the spatial relationship are "above", "under" and "next_to". 
+  For example, you may get an annotated image and a list such as, 
+
+                                  ["3: cup", "4: book", "5: clock", "7: candle", "6: lamp"]
+
+  Your response should be a description of the spatial relationships between the objects
+  in the image. An example to illustrate the response format: 
+
+                                  [("4", "above", "6"), ("3", "next_to", "4")]
+
+  Do not include any other information in your response. Only output a parsable 
+  list of tuples describing the given physical relationships between objects in the image."""
+\end{lstlisting}
+ and the user prompt is, 
+ \begin{lstlisting}
+ 'Here is the list of labels for the annotations of the objects in the image: {labels}. 
+  You gave wrong realtions n the last answer. Please describe the spatial relationships 
+  between the objects in the image correctly and logically. Do not repeat the spatial 
+  relationships and limit the number of tuples to only 20 or less.'
+\end{lstlisting}
+Here, the labels variable contains the objects and their IDs in the following structure, 
+\begin{lstlisting}
+  labels = {"0: cup", "1: table", "31: fridge"}
+\end{lstlisting}
+The code snippet for identifying the spatial relationship between the objects in an image using LLaVA is given below. 
+We can initialize the LLaVA model and processor as shown in \cref{chap:k3}. At each iteration, we take the RGB image along with 
+the list of labels (classes of detected objects) and pass it to the LLaVA model. The system and user prompts are as given above.
+For illustration purposes, we use the image shown in \cref{fig:llava1} as an input and we the the out from LLaVA as seen in \cref{fig:llava2}. 
+\begin{lstlisting}
+  def generate_edges(lava_model, lava_processor, image_path: str, labels: list):
+      raw_image = Image.open(image_path) 
+      conversation = [
+                      {
+
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": system_prompt + user_prompt},
+                            {"type": "image"},
+                        ],
+                      },
+                    ]
+      prompt = lava_processor.apply_chat_template(conversation, add_generation_prompt=True)
+
+      inputs = lava_processor(images=raw_image, text=prompt, return_tensors="pt")
+
+      output = lava_model.generate(**inputs, max_new_tokens=4000, do_sample=False)
+      vlm_answer = processor.decode(output[0][2:], skip_special_tokens=True)
+  return vlm_answer
+\end{lstlisting}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=\textwidth]{content/images/YOLOWorld.png}
+  \caption{High-level working of YOLO-World \cite{cheng2024yolow}}
+  \label{fig:llava1}
+\end{figure}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{content/images/YOLOWorld.png}
+  \caption{High-level working of YOLO-World \cite{cheng2024yolow}}
+  \label{fig:llava2}
+\end{figure}
+\subsubsection{Generation of point clouds}:
+To generate point clouds, we make use of 3D reconstruction techniques. The 2D-pixel coordinates from the image are back-projected into 3D space using the corresponding 
+depth values. The mathematical formula used for this is listed  in the code snippet below. \\
+Here, x and y represent the image pixel coordinates from the RGB image and z denotes the depth values from the D image. This process is known as 
+the pixel-to-world coordinate transformation, where the camera intrinsic parameters fx, fz cx and cy are used to map the 2D pixels into 3D space. 
+The obtained 3D points are then further transformed using the camera pose. 
+\begin{lstlisting}
+  fx, fy, cx, cy = cam_K[0, 0], cam_K[1, 1], cam_K[0, 2], cam_K[1, 2] #camera intrinsics
+  z = #depth_values from depth image
+  x,y = 2D image co-ordinates
+  x = (x - cx) * z / fx
+  y = (y - cy) * z / fy
+
+  points = (x, y, z)
+  colors = #rgb values from the image
+
+  pcd = o3d.geometry.PointCloud()
+  pcd.points = o3d.utility.Vector3dVector(points)
+
+  pcd.colors = o3d.utility.Vector3dVector(colors)
+
+
+  pcd.transform(trans_pose)  # Apply transformation directly to the point cloud
+      
+
+  bbox = pcd.get_oriented_bounding_box(robust=True)
+  if bbox.volume() < 1e-6:
+      continue
+
+  processed_objects[i] = {'pcd': pcd, 'bbox': bbox}
+\end{lstlisting}
+\subsubsection{Denosing and merging objects and edges:}
+In each iteration, we iterate over the newly detected object point clouds to identify and remove redundant objects and noise. We consider two sets;
+the first consists of objects detected in the current iteration, while the second contains objects already stored in the scene graph. To find redundant objects 
+we employ two methods: (1.) calculating the overlap between the two sets using Intersection over Union (IoU) and (2) assessing semantic similarities between the two sets using CLIP image 
+features. If a match is found using either method, the corresponding object in the first set is discarded.
+
+Finally, we perform denoising of the objects in the scene graph using DBSCAN, a clustering algorithm. The scene graph is clustered using DBSCAN with the following parameters:
+eps = 0.02 and min\_point = 10. After clustering the largest cluster obtained is returned. 
+
+\subsection{Training Mask3D and Point Net:}
+After generating the scene graph, the next step is part-object segmentation. To accurately segment functional interactive 
+elements from the point clouds, a robust point cloud segmentation model is needed. Such a model
+must be trained on datasets annotated with objects and their respective parts to understand the fine-grained intra-relationship 
+between an object and its parts. \\
+In our research, we were unable to find a dataset that satisfied our requirements. We needed a dataset containing 3D point clouds
+ of objects such as doors, windows, tables, furniture, and kitchen appliances. Furthermore, the dataset needed to have 
+ the part annotations for each object, classified into one of the eight affordance classes defined previously. 
+ These parts could include door handles, door knobs, rotating knobs and more.  Therefore,
+to fulfil our research needs, we decided to create our dataset.
+
+The idea was to merge existing datasets - SceneFun3D and LabelMaker ARKITscenes. The rationale behind this approach was 
+to combine the object classes from LabelMaker ARKITscenes with the part annotations from the SceneFun3D dataset. 
+To achieve this goal we followed a specific algorithm, as described in \cref{alg:mergeDataset}, which outlines the merging process.
+
+\cref{alg:mergeDataset} takes two dataset as input: 
+\begin{itemize}
+  \item Dataset A, denoted by \textit{a}, which contains the part annotations from \cite{delitzas2024scenefun3d}.
+  \item Dataset B, denoted by \textit{b}, which provides object classes from \cite{ji2024arkitlabelmakernewscale} 
+\end{itemize}
+
+This dataset generated is then split into train, test and validation sets. The training set comprises approximately 60\% of the original dataset 
+while the test and validation sets account for 25\% and 15\%, respectively. We use this dataset to train two segmentation methods 
+namely, Mask3D which is a transformer-based approach and PointNet ++ which is a 3D CNN. 
+
+Both methods require the following data as input: the point cloud with colour information, 3d coordinates, normals, 
+and the labels for each point. Additionally, Mask3D requires two extra features: the segment ID and instance ID because 
+mask3d performs instance segmentation. 
+
+To implement both methods, we retrieved their source code from the GitHub repositories: 
+\begin{itemize}
+  \item Point Net:  \url{https://github.com/yanx27/Pointnet_Pointnet2_pytorch} 
+  \item Mask3D: \url{https://github.com/JonasSchult/Mask3D} 
+\end{itemize}
+ 
+In the following section, we will first explore the implementation of PointNet.
+
+\subsubsection{PointNet++:} 
+The variation of Pointnet we use in our thesis is implemented using PyTorch by \citet{Pytorch_Pointnet_Pointnet2}. They provide sample data pre-processing, training and 
+testing scripts for the Partnet dataset. We made minor changes in each of these scripts to adapt the implementation for our dataset. The whole code base
+can be found at \url{http://mygitcode}. To just give a brief about the changes made, we have changed a few config files for loading the data and setting the
+parameters such as num of targets. Initially, the code had 20 targets for the Partnet dataset. We had to change the mapping dictionary to the following. 
+
+We trained the model for 600 Epochs, 16 batch size and .
+\subsubsection{Mask3D:}
+\begin{Algorithmus} %Use the environment only if you want to place the algorithm similar to graphics from TeX
+  \caption{Algorithm to merge the two datasets.}
+  \label{alg:mergeDataset}
+  \begin{algorithmic}
+    \Procedure{merge}{$a$,$b$} \Comment merging of two datasets, $a$ and $b$
+    \State $\mathsf{transformedA} \gets \mathsf{transform}(a) $ 
+    \State $\mathsf{segmentedA} \gets \mathsf{assignClassesByNearestNeighbor}(transformedA, b) $ 
+    \State \Comment overlapping $b$ (has class labels for each point) with $a$ 
+    \State $\mathsf{segmentedPartsA} \gets \mathsf{separateAndAttachParts}(segementedA, partsList)$ 
+    \State \Call{writeToFile}{$segmentedPartsA$}
+    \EndProcedure
+  \end{algorithmic}
+\end{Algorithmus}
 \subsection{Integration with Concept Graph:}
+In the previous paragraph,  we looked at the models Mask3D and PointNet. We looked at the training process and the datasets used for training. Now, we will 
+look at the integration of these models into ConceptGraphs. This will enable the framework to segment out functional interactive elements present in
+the scene. \\
+The ConceptGraphs implementation iterates over each image in the dataset provided and at each iteration it detects new objects and adds them to 
+the existing concept graph. If new objects are similar to the previous ones they are merged with the existing objects, this can happen because
+the images are taken at very high framerates and an object can appear more than once in a series of images. 
+Therefore, we will focus on integrating our trained models in the last iteration of this process. This enables faster processing as
+all the objects are already processed and ready for further processing. On the other hand, if we had integrated the trained models in between
+such that in each iteration the objects would be passed to the models then the implementation would have been slower. Our method of integrating the 
+models at the very end ensures faster processing as well as is robust as the objects are already denoised and merged until the last iteration thus
+limiting the chances of redundant use of these models for part segmentation. \\
+Both the methods require the pointcloud as an input to the model but PointNet Also requires the class label for the entire object. For this reason,
+we will integrate Mask3D with our current implementation of ConceptGraphs. Moreover, in the real world, we would not already have the segmentation class (plug\_,
+unplug, rotate, pinch\_pull, hook\_pull, hook\_turn, key\_press, foot\_push) present with us. The code snippet below shows how the data is passed to
+the model and what output is obtained.
+
+The part segmentation we receive will be either of the following the segmentations classes (plug\_, unplug, rotate, pinch\_pull, hook\_pull, 
+hook\_turn, key\_press, foot\_push) or a non-functional class (exclude). The non-functional part is the object and we will discard it. The rest of the 
+segmentation which will be the functional interactive element will be given a class name by querying an LLM. The LLM will also be responsible for providing
+at least 5 textual descriptions for the functional interactive element. The descriptions will be the task that can be performed using the 
+functional element and the parent object as a whole. For example, the textual descriptions can be 'The door can be opened using this door handle', '
+Door handle to open the door', 'Door handle to hang a carry bag' or 'Light switch to turn on the lights'. These descriptions will be passed to CLIP
+in order to form text embedding. Finally, the segmented functional interactive element along with its text embeddings and class label will be added
+to the existing list of objects. Thus, our final scene graph will be ready. It will include the large/parent objects as well as the fine-grained
+part segmentations related to larger objects. 
+
 \subsection{Query handling:}
+The scene graph generated in the previous step will contain point clouds for each object as well as their parts, along with the point clouds it will
+also contain the text embeddings, edges (spatial relationships) and class labels. The scene graph can then be queried using textual language. The queries
+can be task descriptions to the robot such as, 'Open the fridge door', 'Open the window' or something more complex such as, 'Get me something to eat 
+from the fridge.'. The scene graph should process the query and return the most probable object or functional element that can be interacted with using the
+robot's actuators. In our system, the textual query will be received via the command line interface and the output will be a heat map over the scene graph
+with the most probable object in red. 
+
+To begin, let us first look at the steps that we carry out during query handling. 
+\begin{compactenum}[1.]
+\item First, we take textual input from the user. 
+\item Next, we tokenize this query and encode it using CLIP to generate text embeddings.
+\item Later, we iterate over all the objects in our scene graph and find the most similar object to the textual description using cosine similarity between the query and the object image features stored during scene graph generation.
+\item Finally, we return the most probable object along with the heat map.
+\end{compactenum}
+
+The final output of our system will be the answer to the query asked by the user. The final output will be a heat map over the scene graph 
+that visualises the probabilities of the detected objects. The probabilities represent how closely the objects resemble the query. The resemblance is shown using colours, 
+with red being the most probable and blue being the least probable.
+
+Following is the code for getting the probabilities and visualising the heat map using open3d. Open3D is an open source 3D visualisation libray \cite{Zhou2018}

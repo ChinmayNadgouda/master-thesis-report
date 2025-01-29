@@ -1,90 +1,90 @@
-In this chapter we will have a look at the 
-state of the art research in the field of scene
- graph and part-object segmentation. We will have a look 
- at various papers and divide this chapter into four sections.
- The four sections are 3D scene graph generation, part-object segmentation,
- task-driven affordance grounding and open vocabulary object detection.
- Finally, we will note down the limitations in the current
- research and thus motivate our thesis to improve these limitations. 
- Specifically, we try to improve fine-grained segmentation i.e
- pat-object segmentation, also called as functionality segmentation.
+In this chapter, we will have a look at the state-of-the-art research in the field of scene graph and part-object segmentation. We will have a look at various papers and divide this chapter into four sections. The four sections are 3D scene graph generation, part-object segmentation,
+task-driven affordance grounding and open vocabulary object detection. Finally, we will note down the limitations in the current research and thus motivate our thesis to improve these limitations. Specifically, we try to improve fine-grained segmentation i.e. pat-object segmentation, also called functionality segmentation. The reason behind reviewing the current research is to avoid redundant research. It also helps in closing the gaps in domain knowledge by giving a summary of the relevant research. Additionally, literature review can spark innovation by realising
+the limitations of current research.
+ 
  \subsection{3D Scene graph generation:}
-In the subject of 3D scene graph generation we will take a look at the following papers, 
+On the subject of 3D scene graph generation, we will take a look at the following papers, 
 Open3DSG\cite{koch2024open3dsgopenvocabulary3dscene}, 3DSceneGraphs \cite{armeni20193d} and ConceptGraph \cite{gu2023conceptgraphsopenvocabulary3dscene}. 
 We look at these papers, as to take inspiration for building our own scene graph 
-using either of these implementaitons. Our take on the task two of the scenefun3D, task-driven affordance grounding will 
-take help of the scene graph generated from one of these implementaitons.
+using either of these implementations. Our take on task two of the scenefun3D, task-driven affordance grounding will 
+take the help of the scene graph generated from one of these implementations. \\
 To generate the scene graphs these papers utilise,
-sequence of RGB-D images and poses of the camera. RGB-D images are the output from a camera.
-RGB expands to Red, Green and Black, it is basically a color image and D stands for depth image. The color images
+a sequence of RGB-D images and poses of the camera. RGB-D images are the output from a camera.
+RGB expands to Red, Green and Blue, it is a color image and D stands for depth image. The color images
 are used for object detection and the depth images along with the poses help in building the 3D point clouds. The poses are
-the position and orientation of the camera in 3D. These poses can be obtained from the camera itself or by using Structure from motin softwares like
-COLMAP \cite{schoenberger2016mvs} \cite{schoenberger2016sfm}. Out of the three, Concept graphs and 
+the position and orientation of the camera in 3D. These poses can be obtained from the camera itself or by using Structure from Motion (SfM) software like
+COLMAP \cite{schoenberger2016mvs} \cite{schoenberger2016sfm}. \\ Out of the three, Concept graphs and 
 Open3DSG generate the 3D scene graph using open vocabulary object detection. Open vocabulary
 object detection enables the model to detect unseen objects at runtime. Concept graph uses YOLO v1.8 for this task whereas Open3DSG uses 
 various vision language models (VLMs) like CLIP and Open Seg.
  The scene graphs also include the relationships between the 
 objects. The relationships can be either spatial or comparative. \\
-Although, these implementaitons are robust and state of the art, they face the limitation of not detecting
-parts of the individual object. They lack the fine grained semantic relationships between the object and its part, for example, a door and its handle.
-Such fine grained information can be useful for manipulating various obejcts in the scene. This  thesis will tackle the exact problem of 
-finding fine-grained realtionships between the object and its part.
+Although these implementations are robust and state-of-the-art, they face the limitation of not detecting
+parts of the individual object. They lack the fine-grained semantic relationships between the object and its part, for example, a door and its handle.
+Such fine-grained information can be useful for manipulating various objects in the scene. This thesis will tackle the exact problem of 
+finding fine-grained relationships between the object and its part.
 
  \subsection{Part-Object segmentation:}
-The task to segment out a part from a 3D object is still novel in today's research due to the limited availability of large scale 3D datasets
-, works like PartNet \cite{Mo_2019_CVPR}, scenefun3D \cite{delitzas2024scenefun3d} have made notable contributions by providing benchmarks and datasets for this problem. 
+The task of segmenting out a part from a 3D object is still novel in today's research due to the limited availability of large-scale 3D datasets
+, works like PartNet \cite{Mo_2019_CVPR}, and scenefun3D \cite{delitzas2024scenefun3d} have made notable contributions by providing benchmarks and datasets for this problem. 
 However, they lack in some areas, PartNet has a limited set of data and it is not specifically related to robotics or object manipulation, the parts are not
-eactly the functional element of the parent object that can be manipulated by a robot. They have general
-classes of obejcts such as airplane, chair just to name a few. Whereas on the other hand, scenefun3D has parts annotated as the functional elements in the entire scene. Considering
-the entire scene as the query for segmenting a part as a functional element has some limitation and their results show average 7 \% average precision, 18 \% average precison for mIoU 
-50\% and 26 \% average precision for mIoU 25\%. We consider their results as a baseline and propose to improve the results. 
+exactly the functional element of the parent object that can be manipulated by a robot. They have general
+classes of objects such as aeroplanes and chairs to name a few. On the other hand, scenefun3D has parts annotated as the functional elements in the entire scene. Considering
+the entire scene as the query for segmenting a part as a functional element has some limitations and their results show an average of 7\% average precision, 18\% average precison for mIoU 
+50\% and 26\% average precision for mIoU 25\%. We consider their results as a baseline and propose to improve the results. \\
 We plan to use only the object as the query to which the part is attached and not the entire scene, thus hypothetically improving the results.
 Part Segmentation is an important task in the context of our thesis. Thus, we look at the current research to utilise one or more of these
-in our final implementaiton. Works like \cite{Liu_2023_CVPR}, \cite{10.1007/978-3-031-72652-1_25} [] perform part segmentation on 2D images using techniques such as LLMs, VLMs and CNNs and then transfer the 
-segments from the 2D to 3D. The reason for not directly segmenting the 3D data is that they lack large scale 3D dataset with such pre annotated part
+in our final implementation. Works like \cite{Liu_2023_CVPR}, and \cite{10.1007/978-3-031-72652-1_25} perform part segmentation on 2D images using techniques such as LLMs, VLMs and CNNs and then transfer the 
+segments from the 2D to 3D. The reason for not directly segmenting the 3D data is that they lack large-scale 3D datasets with such presannotated parts
 and object point clouds. \\
-However, in our work we focus on the part-object segmentaion of 3D point clouds. PointNet 2 implementation provides a way to segment out parts from a object. 
+However, in our work, we focus on the part-object segmentation of 3D point clouds. PointNet 2 implementation provides a way to segment out parts from an object. 
 They use the PartNet dataset which has objects and its part segmented to train their 3D CNN. Similarly, we plan on using the scenefun3D dataset as well as 
-the labelmaker arkit scene dataset. The labelmaker dataset provides object detections for each scene from the ARKIT dataset, where as the scenefun3D has
+the labelmaker ARKITscenes dataset. The labelmaker dataset provides object detections for each scene from the ARKIT dataset, whereas the scenefun3D has
 the parts annotated for around 700 scenes for the same ARKIT scenes. We plan to merge the two datasets to get the final data which contains the objects as 
 well as their parts annotated. We further plan to use this dataset to train Point Net ++ and Mask3D.
  \subsection{Task-driven affordance grounding:}
 Given a specific query (task), identifying and associating the functional elements of an object to the task in the query is known as Task-driven affordance grounding. 
 In the context of grounding 3D scene affordances to the given task, \citet{liu2024grounding3dsceneaffordance} propose
- Egocentric Interaction-driven 3D Scene Affordance Grounding (Ego-SAG). The paper proposes to identify affordance regions in a 3D scene on the basis of 
- an egocentric vieo of the interaction. The paper further compares their results with the following line of work,
+ Egocentric Interaction-driven 3D Scene Affordance Grounding (Ego-SAG). The paper proposes the identification of affordance regions in a 3D scene based on 
+ an egocentric interaction video. The paper further compares their results with the following line of work,
 \cite{huang2024openins3dsnaplookup3d}, \cite{Nguyen_2024_CVPR} and \cite{takmaz2023openmask3dopenvocabulary3dinstance}. However, the fine-grained 
 segmentation of the functional element required to perform the task is absent. Open3dIS presents a framework for 3D instance segmentation which is based on
-zero shot leraning for unseen objects. They leverage 2D mask for guding segmentation process and integrate it with 3D feature extraction pipelines. And, in the context
-of task-driven affordance grouding, the capabilities of Open3DIS are highly relevant but lack the depth of fine grained segmentation. Open Mask 3D is a framework
+zero-shot learning for unseen objects. They leverage 2D masks to guide the segmentation process and integrate them with 3D feature extraction pipelines. And, in the context
+of task-driven affordance grounding, the capabilities of Open3DIS are highly relevant but lack the depth of fine-grained segmentation. Open Mask 3D is a framework
  for open-vocabulary 3D scene understanding. They employ
-various foundation models to generalize various 3D tasks. Transformer based backbone is leveraged that integrates 2D and 3D features to enhance 
-recognition and segmentation tasks. Therefore, tasks such as identifying objects capable of specific interactions benefit from OpenMask 3D. 
-But even OpenMask3D lacks finegrained scene understanding at the functional element level
-Open Mask3D \cite{takmaz2023openmask3dopenvocabulary3dinstance} is also used for comparison by
-\citet{delitzas2024scenefun3d}, here they modify the implementaiton of OpenMask3D a bit to incorporate segmentaion of the functional elements. 
+various foundation models to generalize various 3D tasks.A transformer-based backbone integrating 2D and 3D features to enhance recognition and segmentation tasks is leveraged. 
+Therefore, tasks such as identifying objects capable of specific interactions benefit from OpenMask 3D. 
+But even OpenMask3D lacks fine-grained scene understanding at the functional element level.
+OpenMask3D \cite{takmaz2023openmask3dopenvocabulary3dinstance} is also used for comparison by
+\citet{delitzas2024scenefun3d}, where they modify the implementation of OpenMask3D a bit to incorporate segmentation of the functional elements. 
 They describe this task in \cite{delitzas2024scenefun3d} and present their results and show notable improvements.\\
 However, the results obtained by \citet{delitzas2024scenefun3d}
-can be considered as baseline results and further improved by utilisig scene graph as an intermediate step for task-driven affordance grounding.
-
+can be considered baseline results and further improved by utilising scene graphs as an intermediate step for task-driven affordance grounding.
  \subsection{Open-vocabulary object detection:}
-Open vocabulary object detection refers to the ability of a model to detect obejcts not seen during the training process. 
-In short, the model can detect an label unseen objects at runtime.This is useful for real-world applications where annotations for all the 
-existing objects in the world are not feasible or when there are constraints on resources whilst training. State of the art open vocabulary object detections include
-YOLO world, an advanced, realtime Ultralytics YOLOv8 based approach. It enables detection fo any object in a given image on the basis of descriptive texts \cite{cheng2024yolow}. \\
+Open vocabulary object detection refers to the ability of a model to detect objects not seen during the training process. 
+In short, the model can detect and label unseen objects at runtime. This is useful for real-world applications where annotations for all the 
+existing objects in the world are not feasible or when there are constraints on resources whilst training. State-of-the-art open vocabulary object detections include
+YOLO world, an advanced, real-time Ultralytics YOLOv8-based approach. It enables the detection of any object in a given image based on descriptive texts \cite{cheng2024yolow}. 
+[
+    [
 
+    [
+        Add here
+    ]
+    
+    ]
+]
 In this thesis, we mitigate all the abovementioned limitations and propose
 a novel way to create scene graphs that have the ability to functionally segment
 interactive elements and provide task-driven affordance grounding keeping in context the 
-segmented fine-grained segmentations. At the core of our idea is the 
-point cloud network which will segment the fine-grained part from its object. For this we will train pre existing 
-models like PointNet ++ and Mask3D on our own merged dataset obtained from merging scenefun3D and labelmaker
-ARKIT scene datasets. Further, we will employ a LLM to assign captions with semantically rich descriptions and 
-labels for each instance of the part segment 
-obtained out of every object and store them for language querying. 
+segmented fine-grained segmentation. At the core of our idea is the integration of ConceptGraphs with
+a point cloud network which will segment the fine-grained part from its object. For this, we will train pre-existing 
+models like PointNet ++ and Mask3D on our merged dataset obtained from merging scenefun3D and labelmaker
+ARKIT scene datasets. Further, we will employ an LLM to assign captions with semantically rich descriptions and 
+labels for each instance of the part segment obtained out of every object and store them for language querying. 
 To summarise, our novel contributions are:
-\begin{compactenum}[.]
-\item We propose a novel way to build scene graphs which also includes fine grained segmentation of objects and their parts by tackling the below two tasks.
+\begin{compactenum}[1.]
+\item We propose a novel way to build scene graphs that includes fine-grained segmentation of objects and their parts by tackling the below two tasks.
 \item We tackle the Task 1 functionality segmentation from the authors \citet{delitzas2024scenefun3d} and propose to improve their 
 baseline results.
 \item We also tackle the Task2 task-driven affordance grounding from the authors mentioned in the above point 
