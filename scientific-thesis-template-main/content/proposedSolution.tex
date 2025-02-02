@@ -1,15 +1,17 @@
-We saw the limitations current scene graphs possess in terms of functionality segmentation of interactive elements. We also
+We saw the limitations current scene graph generation methods possess in terms of functionality segmentation of interactive elements. We also
 saw the importance of having such a fine-grained understanding of a scene at the interactive element level. Therefore, we propose a novel way of
 extending the current implementation of \cite{gu2023conceptgraphsopenvocabulary3dscene} by adding functionality segmentation as a part of its process while generating the 
 scene graph. For this, we plan on training point cloud neural networks as well as transformers on a dataset which has annotations for both the
-object and its part. Such a dataset is one of its kind and will be formed by merging two datasets, scenefun3d and labelmaker ARKITscenes.
-The scenefun3D dataset has annotations for various functional interactive elements and categorises them into eight classes namely,
-tip push, hook turn, hook pull, pinch pull, key press, unplug, plug in and rotate. The label maker dataset derives itself from ARKITscenes dataset
+object and its part. Such a dataset is one of its kind and will be formed by merging two datasets, SceneFun3d and ARKit LabelMaker.
+The SceneFun3D dataset has annotations for various functional interactive elements and categorises them into eight classes namely,
+tip\_push, hook\_turn, hook\_pull, pinch\_pull, key\_press, unplug, plug\_in and rotate. The ARKit LabelMaker dataset derives itself from ARKITscenes dataset
 by Apple, they build an automatic pipeline to segment out objects from the ARKITscenes point clouds by first segmenting the objects in 2D and 
 then lifting these segments to 3D. As both these datasets are in the same co-ordinate world we plan to merge them and carve out part-object
 point clouds for training the neural networks and transformers. Later, we propose another innovative idea of using the scene graph for 
 task-driven affordance grounding. For this, the scene graph will be given a language-based task description and it will be expected to return
+task-driven affordance grounding. For this, the scene graph will be given a language-based task description and it will be expected to return
 the interactive segment that can be used to complete the task. Generally, each functional interactive element is associated with an object.
 We plan to retrieve this object by using the scene graph and later pass this object to the pre-trained neural network and Transformer to get
+segmentation. In this segmentation we expect the object segmented out from its part, which will be the answer to the task description given in 
 segmentation. In this segmentation we expect the object segmented out from its part, which will be the answer to the task description given in 
 natural language.

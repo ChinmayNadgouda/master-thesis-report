@@ -1,10 +1,10 @@
 For a future where autonomous robots work independently and precisely complete a given task, a few requirements need to be satisfied. 
-Firstly, the robot needs to successfully identify objects in the vicinity, i.e., perception. Secondly, act on the specific parts of the object,
+Firstly, the robot needs to successfully identify objects in the vicinity, i.e., perception. Secondly, it needs to act on the specific parts of the object,
  keeping in mind the spatial relationships between detected objects, i.e., planning and execution. Finally, object detection should take place
   efficiently and with as little data needed for training as possible; this will ensure that the robot can detect previously unseen objects on 
   the fly in new and complex environments. For this, open-set object detection is a great method of recognizing unseen objects on the fly.
    
-Although these requirements have been fulfilled by Concept Graph and others, there are still further improvements to be made. 
+Although these requirements have been fulfilled by ConceptGraphs, Open3DSG and others, there are still further improvements to be made. 
    For a robot to perform more delicate and specific actions like opening a door, pouring water from a water bottle, or cooking vegetables in a pan, 
    the robot needs to build more specific and detailed relationships between an object and its parts. 
    Implementations mentioned above build a scene graph, which is a semantically rich 3D representation of a scene captured by the robot. 
@@ -13,18 +13,18 @@ Although these requirements have been fulfilled by Concept Graph and others, the
     the robot to interact more effectively with the objects, resulting in improved task performance and delicate interactions comparable to those of a human.
 
     
-This thesis proposes a novel way to extend the information captured by the scene graph in the Concept graph.
+This thesis proposes a novel way to extend the information captured by the scene graph in the ConceptGraphs.
      We plan to also capture part-object relationships and represent them in the form of nodes and edges. 
      To this end, we plan on training a neural network on a pre-annotated dataset of objects and their parts. 
-     This dataset was formed by merging the scenefun3D and Labelmaker ARKIT scenes datasets, which are complements of ARKIT scenes. 
+     This dataset was formed by merging the SceneFun3D and ARKit LabelMaker datasets, which are complements of ARKitScenes. 
     
-     To motivate our study and get useful results, we plan on evaluating our method using two tasks from the three predefined tasks of scenefun3D. 
-     The three tasks are functionality segmentation, task-defined grounding, and (the third task) From these we plan on evaluating our method on the first two tasks.
-      For the task functionality segmentation, we trained two point cloud networks, namely, PointNet++ and Mask3D, on our dataset. 
-      To annotate each object and its parts along with the affordance of each part, we take inspiration from the 8 affordance labels suggested by scenefun3D.
+     To motivate our study and get useful results, we plan on evaluating our method using two tasks from the three predefined tasks of SceneFun3D. 
+     The three tasks are functionality segmentation, task-driven affordance grounding, and motion estimation. From these we plan on evaluating our method on the first two tasks.
+      For the task functionality segmentation, we train two point cloud networks, namely, PointNet++ and Mask3D, on our merged dataset. 
+      To annotate each object and its parts along with the affordance of each part, we take inspiration from the 8 affordance labels suggested by SceneFun3D.
        
-      Later, we tackle the task, task-driven grounding, where we motivate that using a scene graph as an intermediate step proves to 
-       improve the results of finding the relevant object and part for the given task. Scenefun3D uses the whole scene as an input to the network 
+      Later, we tackle the task, task-driven affordance grounding, where we motivate that using a scene graph as an intermediate step proves to 
+       improve the results of finding the relevant object and part for the given task. SceneFun3D uses the whole scene as an input to the network 
        and expects segmentation of the parts in return; however, as the ratio between the size of the scene and the parts is very large, 
        the results are not satisfying. Our idea of using a scene graph as an intermediate step provides as an input the object itself, 
        which might include the part. Thus bring the large scene as an input to just a subset of the scene, i.e., the object,
@@ -32,20 +32,19 @@ This thesis proposes a novel way to extend the information captured by the scene
     
         Excelling in these two tasks will provide a detailed and
          semantically rich map of the environment to the robot. Such a detailed and semantically rich scene graph will enable the robot to perform daily tasks seamlessly.
-[
-    [
-        Add somewhere above
-    ]
-]
-\subsection{Milestones of this thesis:}
+         To this end, we propose SceneGraph3D, an extension to ConceptGraphs with part-object segmentation capabilities. SceneGraph3D aims to
+         generate a scenegraph with fine grained semantic understanding of obejcts and its parts.
+
+\section{Milestones of this thesis}
 To ensure the successful completion of this thesis, we have defined key milestones. 
 The milestones will provide structure to the thesis and will help in evaluating the outcomes at each step.
 
 This primary milestones of this thesis are:
+This primary milestones of this thesis are:
 \begin{compactenum}[1.]
 \item	Implementation of ConceptGraphs on synthetic dataset.
 \begin{itemize}
-    \item Implement the ConceptGraphs framework
+    \item Implement the ConceptGraphs framework.
     \item Execute the framework on Replica dataset.
 \end{itemize}
 \item	Application of ConceptGraphs to Real-World datasets.
@@ -62,21 +61,21 @@ This primary milestones of this thesis are:
 \begin{itemize}
     \item Compare the performance of various part-object segmentation methods
     \item Evalute average precision of each method
-    \item Identify the most efficient method.
+    \item Identify the most accurate method.
 \end{itemize}
 \end{compactenum}
-\subsection{Outline of the thesis:}	
+\section{Outline of the thesis}	
 The outline for this report is as follows; this chapter is the Introduction. 
 First, \cref{chap:k2} will review the state-of-the-art research, highlighting their limitations and the need to materialize the objectives mentioned above. 
 Later, \cref{chap:k3} will provide concrete theory to support the ideas in this thesis, covering foundation models and deep learning models essential for 
 implementation, along with various techniques used to generate, visualize, and evaluate the scene graph. This chapter will define the two tasks given in 
-\cite{delitzas2024scenefun3d} and explain concepts such as object segmentation and open-vocabulary obejct detection.
-\cref{chap:k4} will briefly explain the research methodology employed and the metrics used for evaluation. 
-\cref{chap:k5} will outline the solution strategy. \cref{chap:k6} will provide an insight into the design of the overall implementation and explain the
-finer components of the entire system. \cref{chap:k7} will detail the implementation of the set objectives, including the setup and requirements of 
-the proposed system. It will provide code snippets and algorithms used for successfully implementation. 
+\cite{delitzas2024scenefun3d} and explain concepts such as object segmentation and open-vocabulary object detection.
+\cref{chap:k4} will briefly explain the research methodology employed and the metrics used for evaluation. It will also include 
+\cref{chap:k5}, which will outline the solution strategy. \cref{chap:k6} a part of \cref{chap:k4}, it will provide an insight into the design of the overall implementation and explain the
+finer components of the entire system. Finally the \cref{chap:k7} in \cref{chap:k4}, will detail the implementation of the set objectives, including the setup and requirements of 
+the proposed system. It will provide code snippets and algorithms used for the successful implementation of proposed system. 
 \cref{chap:k8} presents the results obtained after completing all the above-mentioned objectives, with evaluation metrics including manual qualitative 
-evaluation and average precision over mIoU (AP 50\% and AP 2\%). Finally, \cref{chap:k9} outlines the future direction for this thesis and conclude the report.
+evaluation and Average Precision (AP) over mean Intersection over Union (mIoU) (AP 50\% and AP 25\%). Finally, \cref{chap:k9} outlines the future direction for this thesis and conclude the report.
 
 % \subsection{Milestones of this thesis:}
 % For the thesis to be successful we have defined a few milestones. The milestones will structure the thesis and will help in evaluating the outcomes.

@@ -1,0 +1,16 @@
+\babel@toc {english}{}\relax 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {listing}{\numberline {1}{\ignorespaces Parsing COLMAP Poses}}{62}{listing.Alph0.1}%
+\contentsline {listing}{\numberline {2}{\ignorespaces Spatial relationships using LLaVA}}{62}{listing.Alph0.2}%
+\contentsline {listing}{\numberline {3}{\ignorespaces Aligning RGB and D images}}{63}{listing.Alph0.3}%
+\contentsline {listing}{\numberline {4}{\ignorespaces CLIP implementation}}{63}{listing.Alph0.4}%
+\contentsline {listing}{\numberline {5}{\ignorespaces Example for prompting LLaVA - Visual question answering}}{64}{listing.Alph0.5}%
+\contentsline {listing}{\numberline {6}{\ignorespaces SAM implementation}}{64}{listing.Alph0.6}%
+\contentsline {listing}{\numberline {7}{\ignorespaces Query handler implementation}}{65}{listing.Alph0.7}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

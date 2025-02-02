@@ -38,6 +38,16 @@
   supervisor={Dennis Rotondi,\ M.Sc.},
   startdate={August 12, 2024},
   enddate={February 12, 2025}
+  title={Open-set 3D Scene Graph generation with fine-grained
+  scene understanding},
+  author={Chinmay Surendra Nadgouda},
+  type=master,
+  institute={Artificial Intelligence Institute}, % or other institute names - or just a plain string using {Demo\\Demo...}
+  course={Computer Science},
+  examiner={Prof.\ Dr.\ Kai Arras},
+  supervisor={Dennis Rotondi,\ M.Sc.},
+  startdate={August 12, 2024},
+  enddate={February 12, 2025}
 ]{scientific-thesis-cover}
 
 \input{acronyms}
@@ -85,7 +95,7 @@
   \section*{Abstract}
 \fi
 
-Abstract will be one paragraph
+\input{content/abstract.tex}
 
 \cleardoublepage
 
@@ -130,7 +140,7 @@ Abstract will be one paragraph
 \ifdeutsch
   \listof{Listing}{Verzeichnis der Listings}
 \else
-  \listof{Listing}{List of Listings}
+  \listoflistings
 \fi
 
 %mittels \newfloat wurde die Algorithmus-Gleitumgebung definiert.
@@ -204,29 +214,35 @@ Abstract will be one paragraph
 
 
 \chapter{Introduction}
+\label{chap:k1}
 \input{content/introduction.tex}
+\let\cleardoublepage\clearpage
 \let\cleardoublepage\clearpage
 \chapter{Related Work}
 \label{chap:k2}
 \input{content/relatedWork}
 \let\cleardoublepage\clearpage
-\chapter{Theory}
+\chapter{Background}
 \label{chap:k3}
 \input{content/theory}
 \let\cleardoublepage\clearpage
-\chapter{Research methodology}
+\chapter{Methodology}
 \label{chap:k4}
+\input{content/researchMethodology.tex}
 \let\cleardoublepage\clearpage
-\chapter{Proposed solution}
+\section{Proposed solution}
 \label{chap:k5}
 \input{content/proposedSolution.tex}
 \let\cleardoublepage\clearpage
-\chapter{Design}
+\section{Design}
 \label{chap:k6}
 \input{content/designPlan.tex}
 \let\cleardoublepage\clearpage
-\chapter{Implementation}
+\section{Implementation}
 \label{chap:k7}
+\input{content/implementation.tex}
+\let\cleardoublepage\clearpage
+\chapter{Experiments and Results}
 \input{content/implementation.tex}
 \let\cleardoublepage\clearpage
 \chapter{Experiments and Results}
@@ -234,15 +250,216 @@ Abstract will be one paragraph
 \input{content/results.tex}
 \let\cleardoublepage\clearpage
 \chapter{Conclusion and Future direction}
+\input{content/results.tex}
+\let\cleardoublepage\clearpage
+\chapter{Conclusion and Future direction}
 \label{chap:k9}
+\input{content/conclusion.tex}
 \input{content/conclusion.tex}
 
 \printbibliography
 
 All links were last followed on February 12, 2025.
-
+\clearpage 
 \appendix
+\section{Code Snippets:}
+\begin{listing}[ht]
+  \caption{Parsing COLMAP Poses}
+  \label{lst:pose}
+\begin{lstlisting}
+  with open(os.path.join("images.txt"), "r") as f:
+    for line in f:
+      elems=line.split(" ") # 1-4 is quat, 5-7 is trans, 9ff is filename 
+      qvec = np.array(tuple(map(float, elems[1:5])))
+      tvec = np.array(tuple(map(float, elems[5:8])))
+      R = qvec2rotmat(-qvec)
+      t = tvec.reshape([3,1])
+      m = np.concatenate([np.concatenate([R, t], 1), bottom], 0)
+      c2w = np.linalg.inv(m)
+      c2w[0:3,2] *= -1 # flip the y and z axis
+      c2w[0:3,1] *= -1
+      c2w = c2w[[1,0,2,3],:]
+      c2w[2,:] *= -1 # flip whole world upside down
+      c2w[2,:] *= -1 # flip whole world upside down
+\end{lstlisting}
+\end{listing}
+\begin{listing}[ht]
+  \caption{Spatial relationships using LLaVA}
+  \label{lst:llavaImpl}
+\begin{lstlisting}
+  def generate_edges(lava_model, lava_processor, image_path: str, labels: list):
+      raw_image = Image.open(image_path) 
+      conversation = [
+                      {
 
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": system_prompt + user_prompt},
+                            {"type": "image"},
+                        ],
+                      },
+                    ]
+      prompt = lava_processor.apply_chat_template(conversation, add_generation_prompt=True)
+
+      inputs = lava_processor(images=raw_image, text=prompt, return_tensors="pt")
+
+      output = lava_model.generate(**inputs, max_new_tokens=4000, do_sample=False)
+      vlm_answer = processor.decode(output[0][2:], skip_special_tokens=True)
+  return vlm_answer
+\end{lstlisting}
+\end{listing}
+\begin{listing}[ht]
+  \caption{Aligning RGB and D images}
+  \label{lst:align}
+\begin{lstlisting}
+  import pyrealsense2 as rs
+
+  pipeline = rs.pipeline()     
+  config = rs.config()
+  config.enable_device_from_file(fname, repeat_playback=False) 
+                                          #fname contain the .rosbag location
+  align_to = rs.stream.color
+  align = rs.align(align_to)
+  while True:
+    frames = pipeline.wait_for_frames()
+    aligned_frames = align.process(frames)
+    aligned_depth_frame = aligned_frames.get_depth_frame()
+    color_frame = aligned_frames.get_color_frame()
+    if not aligned_depth_frame or not color_frame:
+        continue
+    depth_image = np.asanyarray(aligned_depth_frame.get_data())
+    color_image = np.asanyarray(color_frame.get_data())
+    color_image_rgb = cv2.cvtColor(color_image, cv2.COLOR_BGR2RGB) 
+                                         #output is BGR need to convert to RGB
+  pipeline.stop()
+\end{lstlisting}
+\end{listing}
+\begin{listing}[ht]
+  \caption{ CLIP implementation}
+  \label{lst:clipImpl}
+\begin{lstlisting}
+  def get_clip_embeddings(CLIP, cropped_images, detection_classes):
+    preprocessed_images = []
+    image_crops = []
+    for cropped_image in cropped_images:  
+      preprocessed_image = clip_preprocess(cropped_image).unsqueeze(0)
+      preprocessed_images.append(preprocessed_image)
+      image_crops.append(cropped_image)
+    
+    text_tokens = detection_classes
+    image_features = []
+    image_feats = []
+    if len(detection_classes) is not 0:
+      # Convert lists to batches
+      preprocessed_images_batch = torch.cat(preprocessed_images, dim=0).to(device)
+      text_tokens_batch = clip_tokenizer(text_tokens).to(device)
+
+      # Batch inference
+      with torch.no_grad():
+          image_features = CLIP.encode_image(preprocessed_images_batch)
+          image_features /= image_features.norm(dim=-1, keepdim=True)
+
+      # Convert to numpy
+      image_feats = image_features.cpu().numpy()
+    return image_feats, image_crops
+\end{lstlisting}
+\end{listing}
+\begin{listing}[ht]
+  \caption{Example for prompting LLaVA - Visual question answering}
+  \label{lst:lavaTheory}
+\begin{lstlisting}
+  from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration, BitsAndBytesConfig
+  import torch
+  from PIL import Image
+  
+  processor = LlavaNextProcessor.from_pretrained(model_id)
+  bnb_config = BitsAndBytesConfig(
+                              load_in_4bit=True, bnb_4bit_use_double_quant=True,
+                              bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.bfloat16)
+  model = LlavaNextForConditionalGeneration.from_pretrained("llava-hf/llava-v1.6-vicuna-13b-hf", 
+                                                            torch_dtype=torch.float16, 
+                                                            low_cpu_mem_usage=True, 
+                                                            quantization_config=bnb_config,
+                                                            use_flash_attention_2=True ) 
+  torch.set_default_dtype(torch.float16)
+  image = Image.open("sceneGraph3D/conceptgraph/scripts/frame000090annotated_for_vlm.jpg")
+  conversation = [
+      {
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Please describe the given image."},
+            {"type": "image"}
+          ],
+      },
+  ]
+  prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
+  inputs = processor(images=image, text=prompt, return_tensors="pt")
+  output = model.generate(**inputs, max_new_tokens=500, do_sample=False)
+  print(processor.decode(output[0], skip_special_tokens=True))
+  \end{lstlisting}
+\end{listing}
+
+\begin{listing}[ht]
+  \caption{ SAM implementation}
+  \label{lst:samImpl}
+\begin{lstlisting}
+  def get_object_masks(SAM, rgb, bounding_box = xyxy_tensor):
+    sam_predictor = SAM('mobile_sam.pt') # UltraLytics SAM
+    if bounding_box.numel() != 0:
+        sam_out = sam_predictor.predict(rgb, bboxes=bounding_box, verbose=False)
+        masks_tensor = sam_out[0].masks.data
+        mask = masks_tensor.cpu().numpy()
+    else:
+        mask = np.empty((0, *color_tensor.shape[:2]), dtype=np.float64)
+    
+        return mask
+\end{lstlisting}
+\end{listing}
+\begin{listing}[ht]
+  \caption{ Query handler implementation}
+  \label{lst:queryHandler}
+\begin{lstlisting}
+  text_query = input("Enter your query: ")
+  text_queries = [text_query]
+  
+  text_queries_tokenized = clip_tokenizer(text_queries).to("cuda")
+  text_query_ft = clip_model.encode_text(text_queries_tokenized)
+  text_query_ft = text_query_ft / text_query_ft.norm(dim=-1, keepdim=True)
+  text_query_ft = text_query_ft.squeeze()
+  
+  # similarities = objects.compute_similarities(text_query_ft)
+  objects_clip_fts = objects.get_stacked_values_torch("clip_ft")
+  objects_clip_fts = objects_clip_fts.to("cuda")
+  similarities = F.cosine_similarity(
+      text_query_ft.unsqueeze(0), objects_clip_fts, dim=-1
+  )
+  max_value = similarities.max()
+  min_value = similarities.min()
+  normalized_similarities = (similarities - min_value) / (max_value - min_value)
+  probs = F.softmax(similarities, dim=0)
+  max_prob_idx = torch.argmax(probs)
+  similarity_colors = cmap(normalized_similarities.detach().cpu().numpy())[..., :3]
+
+  max_prob_object = objects[max_prob_idx]
+  
+  for i in range(len(objects)):
+      pcd = pcds[i]
+      map_colors = np.asarray(pcd.colors)
+      pcd.colors = o3d.utility.Vector3dVector(
+          np.tile(
+              [
+                  similarity_colors[i, 0].item(),
+                  similarity_colors[i, 1].item(),
+                  similarity_colors[i, 2].item()
+              ], 
+              (len(pcd.points), 1)
+          )
+      )
+
+  for pcd in pcds:
+      vis.update_geometry(pcd)  
+\end{lstlisting}
+\end{listing}
 \pagestyle{empty}
 \renewcommand*{\chapterpagestyle}{empty}
 \Versicherung

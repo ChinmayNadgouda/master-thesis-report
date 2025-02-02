@@ -1,14 +1,90 @@
-\subsection{Future Work:}
-The system proposed is not infallible and has some limitations. The limitations come from the fact that the size of the dataset used to train the models (Mask3D 
-and PointNet++) was small. Another point that can be improved in our work is the use of newer models in the future that are designed to segment out fine-grained masks
-for such small interactive elements. Apart from these limitations, there are some future directions that our work can take forward.
-\begin{compactenum}[1.]
-    \item	Query the system using voice commands, a voice-to-text recognition model can be implemented to transform the commands given by voice by a human to text. This text can then be fed to our system
-    \item	The part-object detection models can be used as separate components and be used in other downstream tasks which require segmenting parts from an object such as bin picking.
-    \end{compactenum}
-In this thesis, we present a novel way to extend the implementation of ConceptGraphs that enables the generation of scene graphs with additional fine-grained 
-semantically rich information of functionally interactive elements like 'door handles', 'door knobs', and 'sink faucets'. To achieve this goal, models like Mask3D,
-and PointNet were leveraged and trained on datasets like scenefun3d and label maker enabling the successful implementation of this Research topic. Further, we also evaluated 
-our system based on the baseline results of the two tasks defined by scenefun3d and saw a considerable improvement of over 5\% in AP. We envision further improvements in
-our model with newer 3D datasets for segmentation tasks and more capable models. 
+% \subsection{Future Work:}
+% The system proposed is not infallible and has some limitations. The limitations come from the fact that the size of the dataset used to train the models (Mask3D 
+% and PointNet++) was small. Another point that can be improved in our work is the use of newer models in the future that are designed to segment out fine-grained masks
+% for such small interactive elements. Apart from these limitations, there are some future directions that our work can take forward.
+% \begin{compactenum}[1.]
+%     \item	Query the system using voice commands, a voice-to-text recognition model can be implemented to transform the commands given by voice by a human to text. This text can then be fed to our system
+%     \item	The part-object detection models can be used as separate components and be used in other downstream tasks which require segmenting parts from an object such as bin picking.
+%     \end{compactenum}
+% In this thesis, we present a novel way to extend the implementation of ConceptGraphs that enables the generation of scene graphs with additional fine-grained 
+% semantically rich information of functionally interactive elements like 'door handles', 'door knobs', and 'sink faucets'. To achieve this goal, models like Mask3D,
+% and PointNet were leveraged and trained on datasets like scenefun3d and label maker enabling the successful implementation of this Research topic. Further, we also evaluated 
+% our system based on the baseline results of the two tasks defined by scenefun3d and saw a considerable improvement of over 5\% in AP. We envision further improvements in
+% our model with newer 3D datasets for segmentation tasks and more capable models. 
+\section{Future Direction}
 
+The system proposed in the thesis has demonstrated promising results; however, it has its own limitations. 
+The size of the dataset for training the Mask3D and PointNet++ models is a primary limitation. 
+The dataset has a mere 2198 training samples, 455 validation samples, and 645 test samples. 
+It is much smaller compared to other datasets, such as Scannet. A larger and more diverse dataset would improve the overall performance in a
+ real-world setting and enable the models to generalize. Moreover, in the future, newer part segmentation models could be used when available,
+  thus eliminating the overhead of creating a dataset and training models on our own. The system currently supports pre-recorded RGB-D 
+  images and poses as input. This limits the system from performing real-time detections and scene graph generation. 
+  The use of heavy models like LLaVA, Mask3D, and YOLO makes the execution slower. For enabling real-time mapping and detection,
+   the system could benefit from newer and lightweight models in the future. Lastly, the system is capable of just textual queries
+    and could benefit from multimodal querying, such as voice or images.
+
+Following are the directions for future research and improvements based on above limitation and more: 
+\begin{compactenum}[1.]
+\item Realtime Scene Graph Generation:
+While our implementation focuses on identifying semantically rich details for interactive elements, a possible direction to this 
+could be refining the scene graph generation process itself. The refinement could include richer time-based contextual and relational information
+    such that, the scene graph updates itself dynamically according to environmental changes. This could be a vital application for real-time 
+    robotic systems where the robot must continually map and interact with its surroundings. 
+\item Voice-Based Querying:
+The usability of the system could be enhanced by enabling voice commands. This can be very intuitive for the user as well.
+This can be done by implementing a voice-to-text recognition model thus allowing users to communicate the query using their voice.
+The voice command could be converted to text and forwarded to the system. This makes the system accessibile and proves to be a 
+more natural way of interacting with the system, particularly in scenarios where it is not feasible to access the system manually via text.
+\item Benchmarking Against More Robust Datasets:
+While the current system has been evaluated using the SceneFun3D dataset, future work could also explore additional 3D 
+segmentation datasets to validate performance. To significantly increase the robustness of the models, the training and evaluation could be 
+expanded to datasets with higher object variability and more annotated interactions.
+
+\item Exploration of Multi-Modal Learning:
+Another exciting direction is integrating multi-modal learning approaches that combine RGB, depth, and textual information.
+ By leveraging transformer-based architectures that can process different modalities simultaneously, 
+ the system could develop a more comprehensive understanding of object semantics and improve segmentation accuracy.
+  This could be particularly useful when dealing with occlusions or ambiguous object boundaries.
+  \item Deployment of Part segmentation models in Downstream Tasks:
+  The models like Mask3D and PointNet++ are open source and can be used for various downstream tasks. The checkpoints created during 
+  our experiments are available in the GitHub repository mentioned earlier. These models could be leveraged in industrial settings, for example,
+  automated bin packing, where robots need to accurately identify and grasp components in a cluttered bin. In addition to that, similar
+  adjustments could be made to the models thus enabling them to perform in fields that need a detailed understanding of object parts.
+  Fields such as, robotic assistance systems, augmented reality applications, and autonomous navigation.
+\end{compactenum}
+\section{Conclusion}
+
+% In this thesis, we presented a novel approach to extending the ConceptGraphs framework to generate scene graphs enriched with fine-grained semantic information about functionally interactive elements, such as ‘door handles,’ ‘door knobs,’ and ‘sink faucets.’ By leveraging state-of-the-art models like Mask3D and PointNet++, we successfully trained our system using datasets such as scenefun3d and LabelMaker to segment these small but crucial objects. The evaluation results demonstrated a significant improvement of over 5% in average precision (AP) compared to baseline methods, highlighting the effectiveness of our approach.
+
+% Despite these successes, there is still room for further improvements. Advancements in dataset quality, model architecture, and multi-modal learning could significantly boost performance and applicability. Additionally, integrating user-friendly features such as voice-based querying and adapting the system for real-world downstream tasks could enhance its practical utility. As new 3D segmentation models and datasets emerge, there is strong potential to refine this work further and contribute to more sophisticated and generalizable scene graph generation techniques.
+
+% In conclusion, this research takes an important step toward enriching robotic perception and scene understanding by focusing on small but functionally significant elements in an environment. Future efforts in this domain have the potential to improve robotic interaction capabilities, enhance automated systems, and broaden the scope of real-world applications that rely on detailed scene comprehension.
+
+In this thesis, we tackled the problem of scene graph generation and part-object segmentation.
+ We first examined the latest research in the fields of 3D scene graph generation, part-object segmentation, 
+ task-driven affordance grounding, and open vocabulary object detection. By listing the problems in each area, 
+ we showed how important it is to create a new process for generating scene graphs that include detailed information 
+ about the interactive parts of the scene. \\ SceneFun3D's two tasks, functionality segmentation and task-driven affordance grounding, 
+ served as the inspiration for part-object segmentation in scene graphs. We saw that excelling in these two tasks would enable a
+  robot to seamlessly interact with its environment and perform delicate tasks such as opening the door, opening a drawer, and more.
+   The robot would also acquire semantic information about the scene, enabling it to understand spatial relationships and perform 
+   tasks such as opening the cabinet below the washbasin or the drawer below the heater. \\The thesis provided essential background
+    knowledge for fundamental concepts used in system conceptualization. The concepts included 3D scene graphs, foundational models, 
+    object segmentation, and open vocabulary object detection. \\ It was possible to understand how the three parts of the proposed 
+    system—the data pre-processor, the scene graph generator, and the query handler—work together by looking at the detailed design of 
+    the system. Later, we looked at the implementation details and listed the system requirements in order to reproduce the results. \\ 
+    Finally, the results showcased the promising value provided by the system. The system performed better than the baseline results of SceneFun3D,
+     improving overall by 9\% in the average precision metric for functionality segmentation. 
+     The system even extended the scene graph generation process by integrating the trained Mask3D model with ConceptGraphs.
+      This integration enabled the system to ground the textual queries to the functionally interactive elements in the scene graph.
+
+% Despite these successes, there is still room for further improvements. Advancements in dataset quality, model architecture, 
+% and multi-modal learning could significantly boost performance and applicability. Additionally, integrating user-friendly 
+% eatures such as voice-based querying and adapting the system for real-world downstream tasks could enhance its practical utility.
+% As new 3D segmentation models and datasets emerge, there is strong potential to refine this work further and contribute to more 
+% sophisticated and generalizable scene graph generation techniques.
+
+In spite of promising results, there is still room for improvements. Greater dataset quality, newer models, and multimodal querying could improve the performance tenfold and increase the applicability. Additionally, we recommend integrating voice-based querying and adapting the system to real-world downstream tasks to increase practical usage. As new 3D segmentation models and datasets come out, there is a big chance to improve this work and make scene graph generation methods smarter and more useful for all situations. 
+
+In conclusion, this thesis takes an important step toward enriching robotic perception and scene understanding by focusing on small but functionally significant elements in an environment. Future efforts in this domain have the potential to improve robotic interaction capabilities, enhance automated systems, and broaden the scope of real-world applications that rely on detailed scene comprehension.
