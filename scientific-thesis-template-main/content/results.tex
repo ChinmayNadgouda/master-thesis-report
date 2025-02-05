@@ -39,7 +39,7 @@ For this task, we will present both the quantitative results as well as the qual
 SceneFun3D have adapted Mask3D for this task. They also compare SoftGroup and LERF. We have utilised Mask3D and PointNet++ in our experiments. The reason for using 
 Mask3D was to compare the results with SceneFun3D and evaluate our method. PointNet ++ was also leveraged for this task but we present qualitative results for PointNet++.
 
-The table below compares the results from SceneFun3D and our experiments. We also consider all the results from SceneFun3D and do not only limit ourselves to
+The \cref{tab:quantitativeResults} compares the results from SceneFun3D and our experiments. We also consider all the results from SceneFun3D and do not only limit ourselves to
 Mask3D. 
 
 \begin{longtable}{l|l|l|l}
@@ -48,10 +48,23 @@ Mask3D.
     SoftGroup-F & 3.6 & 17.2 & 11 \\
     LERF & 4.8 & 12.3 & 18.1\\
     Mask3D-F & 7.9 & 18.3 & 26.6\\
-    Mask3D-Ours & \textbf{22.2} & \textbf{28.8} & \textbf{35.8}\\
+    Mask3D-Ours & \textbf{20.5} & \textbf{28.3} & \textbf{32.2}\\
     \hline
 \end{longtable}
-    
+\begin{longtable}{l|l|l|l}
+    \caption{Quantitative results of individual affordance classes for functionality segmentation using Mask3D on merged dataset.} \label{tab:quantitativeResultsIndividual} \\
+    \hline \multicolumn{1}{|c|}{\textbf{Affordance Class}} & \multicolumn{1}{c|}{\textbf{AP}} & \multicolumn{1}{c|}{\textbf{AP\textsubscript{50}}} & \multicolumn{1}{c|}{\textbf{AP\textsubscript{25}}} \\ \hline
+    hook\_turn & \textbf{43.3} & \textbf{62.4} & \textbf{62.4} \\
+    hook\_pull & 6.9 & 13.8 & \textbf{20.6}\\
+    key\_press & 6.8 & 11.5 & \textbf{21}\\
+    rotate & \textbf{24.5} & \textbf{31.7} & \textbf{34.6}\\
+    foot\_push & 3.2 & \textbf{19.9} & \textbf{23.2}\\
+    unplug & 3 & 3.7 & 5\\
+    plug\_in & 0 & 0.1 & 0.9\\
+    pinch\_pull & \textbf{15.6} & \textbf{31.2} & \textbf{41}\\
+    tip\_push & 0 & 0 & 0\\
+    \hline
+\end{longtable}
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=\textwidth]{content/images/results/PartObj.png}
@@ -65,6 +78,7 @@ Mask3D.
     \caption{Part-Object segmentation results for class hook\_turn on ARKITscenes dataset.}
     \label{fig:task1result2}
 \end{figure}
+We also present the individual AP results for each affordance class in \cref{tab:quantitativeResultsIndividual}
 In addition to quantitative results, let us take a look at some qualitative results in \cref{fig:task1result1} and \cref{fig:task1result2}. 
 Further, \cref{fig:task1result1} shows the part-object segmentation for the affordance class \enquote{pinch\_pull}, here the parts are in black colour and
 they can be afforded to be pinch pulled. \cref{fig:task1result2} shows the part-object segmentation for class \enquote{hook\_turn}, here
