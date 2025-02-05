@@ -1,8 +1,9 @@
 After implementing our system, the next step is conducting experiments. This will assist in evaluating and validating our thesis results.
-We focus on quantitative and qualitative results. To present our quantitative results we will use Average Precision at mean Intersection over Union (mIoU) thresholds of 
-25\% and 50\% and for qualitative results will present a few of the point cloud segmentation and scene graphs generated using our system. We present the results in 
+We focus on quantitative and qualitative results. To present our quantitative results we will use Average Precision (AP) at mean Intersection over Union (mIoU) thresholds of 
+25\% (AP\textsubscript{25}), 50\% (AP\textsubscript{50}), and AP,  the average over
+different IoU thresholds from 0.5 to 0.95 with a step of 0.05 and for qualitative results will present a few of the point cloud segmentation and scene graphs generated using our system. We present the results in 
 three parts. The first part illustrates the qualitative results of the scene graph generation method used, we show two scene graphs generated from two different datasets.
-The second part illustrates the quantitative as well as qualitative results of Mask3D trained on our merged dataset, we present AP, AP\_50 and AP\_25 values and some 
+The second part illustrates the quantitative as well as qualitative results of Mask3D trained on our merged dataset, we present AP, AP\textsubscript{50} and AP\textsubscript{25} values and some 
 snapshots of the final part-segmentation for a few objects. The final part showcases the qualitative results for integrating Mask3D with ConceptGraphs in order to
 tackle the task two from SceneFun3D, task-driven affordance grounding.
 
@@ -16,7 +17,7 @@ earlier.
     \caption{Scene graph of a scene from ARKITscenes (visit\_id 468074, video\_id 47333827)}
     \label{fig:result1}
 \end{figure}
-\section{Scene graph generation on self captured dataset}
+\section{Scene graph generation on real-world dataset}
 \label{sec:SG}
 One of the milestones of this thesis was to generate a scene graph using the dataset captured live, i.e. a real-world dataset. We performed experiments related to
  this task using two approaches. The first approach was to utilise the already recorded SceneFun3D dataset which has real-world scenes. The second approach was 
@@ -45,13 +46,9 @@ Mask3D.
     \caption{Quantitative result comparison for task functionality segmentation.} \label{tab:quantitativeResults} \\
     \hline \multicolumn{1}{|c|}{\textbf{Method}} & \multicolumn{1}{c|}{\textbf{AP}} & \multicolumn{1}{c|}{\textbf{AP\textsubscript{50}}} & \multicolumn{1}{c|}{\textbf{AP\textsubscript{25}}} \\ \hline
     SoftGroup-F & 3.6 & 17.2 & 11 \\
-\begin{longtable}{l|l|l|l}
-    \caption{Quantitative result comparison for task functionality segmentation.} \label{tab:quantitativeResults} \\
-    \hline \multicolumn{1}{|c|}{\textbf{Method}} & \multicolumn{1}{c|}{\textbf{AP}} & \multicolumn{1}{c|}{\textbf{AP\textsubscript{50}}} & \multicolumn{1}{c|}{\textbf{AP\textsubscript{25}}} \\ \hline
-    SoftGroup-F & 3.6 & 17.2 & 11 \\
     LERF & 4.8 & 12.3 & 18.1\\
     Mask3D-F & 7.9 & 18.3 & 26.6\\
-    Mask3D-Ours & 22.2 & 28.8 & 35.8\\
+    Mask3D-Ours & \textbf{22.2} & \textbf{28.8} & \textbf{35.8}\\
     \hline
 \end{longtable}
     
@@ -69,7 +66,7 @@ Mask3D.
     \label{fig:task1result2}
 \end{figure}
 In addition to quantitative results, let us take a look at some qualitative results in \cref{fig:task1result1} and \cref{fig:task1result2}. 
-\cref{fig:task1result1} shows the part-object segmentation for the affordance class \enquote{pinch\_pull}, here the parts are in black colour and
+Further, \cref{fig:task1result1} shows the part-object segmentation for the affordance class \enquote{pinch\_pull}, here the parts are in black colour and
 they can be afforded to be pinch pulled. \cref{fig:task1result2} shows the part-object segmentation for class \enquote{hook\_turn}, here
 the part is colored red and the non functional segment is in light green.
 

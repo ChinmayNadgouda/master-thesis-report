@@ -1,7 +1,5 @@
 In this section, we will look at the high-level design of our implementation. We will define the individual components in our
 implementation and show how they are connected and how data flows between them.
-In this section, we will look at the high-level design of our implementation. We will define the individual components in our
-implementation and show how they are connected and how data flows between them.
 
 \subsection{Design}
 Our implementation has three important parts, data pre-processor, scene graph generator and query handler. The query handler will also visualise
@@ -13,7 +11,6 @@ the answers to the query. In the \cref{fig:system_desgin} you can see the pictor
     \label{fig:system_desgin}
 \end{figure}
 
-We will dive deep into the details of each component one by one. First, we will look at the data pre-processor, next the scene graph generator and finally 
 We will dive deep into the details of each component one by one. First, we will look at the data pre-processor, next the scene graph generator and finally 
 the query handler.
 
@@ -56,7 +53,6 @@ objects, by passing the image and the bounding box to SAM, it will segment out t
 in order to get textual embedding for the image, these embeddings will be used later while querying to find similarities between objects and the query. 
 Each object generated from this pipeline will be passed to a VLM like LLaVA to get spatial relationships (edges) between the objects detected. Finally,
 we will generate the point cloud for each object using the masks from SAM, the depth values from D images and camera poses for each image. This point cloud
-will be passed to a neural network or a transformer to perform part segmentation and segment out functional interactive elements. This way a scene graph will be generated where objects will be
 will be passed to a neural network or a transformer to perform part segmentation and segment out functional interactive elements. This way a scene graph will be generated where objects will be
 the nodes for this graph and the spatial relationships will be the edges. The scene graph will be then passed to the next component for handling queries.
 The tasks of edge generation and part segmentation can be skipped to enable faster scene graph generation, 

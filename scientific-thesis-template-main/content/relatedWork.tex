@@ -11,8 +11,6 @@ take the help of the scene graph generated from one of these implementations. \\
 To generate the scene graphs these papers utilise,
 a sequence of RGB-D images and poses of the camera. RGB-D images are the output from a camera.
 RGB expands to Red, Green and Blue, it is a color image and D stands for depth image. The color images
-a sequence of RGB-D images and poses of the camera. RGB-D images are the output from a camera.
-RGB expands to Red, Green and Blue, it is a color image and D stands for depth image. The color images
 are used for object detection and the depth images along with the poses help in building the 3D point clouds. The poses are
 the position and orientation of the camera in 3D. These poses can be obtained from the camera itself or by using Structure from Motion (SfM) software like
 COLMAP \cite{schoenberger2016mvs} \cite{schoenberger2016sfm}. \\ Out of the three, ConceptGraphs and 
@@ -21,10 +19,6 @@ object detection (OVOD) enables the model to detect unseen objects at runtime. C
 various vision language models (VLMs) like CLIP \cite{radford2021learningtransferablevisualmodels} and Open Seg \cite{ghiasi2022scalingopenvocabularyimagesegmentation}.
  The scene graphs also include the relationships between the 
 objects. The relationships can be either spatial or comparative. \\
-Although these implementations are robust and state-of-the-art, they face the limitation of not detecting
-parts of the individual object. They lack the fine-grained semantic relationships between the object and its part, for example, a door and its handle.
-Such fine-grained information can be useful for manipulating various objects in the scene. This thesis will tackle the exact problem of 
-finding fine-grained relationships between the object and its part.
 Although these implementations are robust and state-of-the-art, they face the limitation of not detecting
 parts of the individual object. They lack the fine-grained semantic relationships between the object and its part, for example, a door and its handle.
 Such fine-grained information can be useful for manipulating various objects in the scene. This thesis will tackle the exact problem of 
@@ -51,8 +45,6 @@ well as their parts annotated. We further plan to use this dataset to train Poin
  \section{Task-driven affordance grounding}
 Given a specific query (task), identifying and associating the functional elements of an object to the task in the query is known as Task-driven affordance grounding. 
 In the context of grounding 3D scene affordances to the given task, \citet{liu2024grounding3dsceneaffordance} propose
- Egocentric Interaction-driven 3D Scene Affordance Grounding (Ego-SAG). The paper proposes the identification of affordance regions in a 3D scene based on 
- an egocentric interaction video. The paper further compares their results with the following line of work,
  Egocentric Interaction-driven 3D Scene Affordance Grounding (Ego-SAG). The paper proposes the identification of affordance regions in a 3D scene based on 
  an egocentric interaction video. The paper further compares their results with the following line of work,
 \cite{huang2024openins3dsnaplookup3d}, \cite{Nguyen_2024_CVPR} and \cite{takmaz2023openmask3dopenvocabulary3dinstance}. However, the fine-grained 
@@ -91,8 +83,6 @@ models like PointNet ++ and Mask3D on our merged dataset obtained from merging S
 Further, we will employ an Large Language Model (LLM) to assign captions with semantically rich descriptions and 
 labels for each instance of the part segment obtained out of every object and store them for language querying. 
 To summarise, our novel contributions are:
-\begin{compactenum}[1.]
-\item We propose a novel way to build scene graphs that includes fine-grained segmentation of objects and their parts by tackling the below two tasks.
 \begin{compactenum}[1.]
 \item We propose a novel way to build scene graphs that includes fine-grained segmentation of objects and their parts by tackling the below two tasks.
 \item We tackle the Task 1 functionality segmentation from the authors \citet{delitzas2024scenefun3d} and propose to improve their 
